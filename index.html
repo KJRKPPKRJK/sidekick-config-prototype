@@ -1,1552 +1,515 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Action Card Builder</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sidekick Studio — Action Card Builder</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            walmart: {
-              blue: '#0071DC', 'blue-dark': '#004F9A', 'blue-light': '#E6F1FC',
-              navy: '#041E42',
-              yellow: '#FFC220', spark: '#FFC220',
-              gray: { 50:'#F8F8F8', 100:'#F1F1F2', 200:'#E3E4E5', 300:'#D9D9D9', 400:'#74767C', 500:'#515357', 600:'#2E2F32', 700:'#2E2F32', 800:'#2E2F32' },
-              success:'#6DD400','success-dark':'#2A8703','success-light':'#E8F5E9',
-              error:'#9B1419','error-light':'#FCE8E9',
-              warning:'#F57C00','warning-light':'#FFF3E0',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    *{box-sizing:border-box}body{font-family:'Inter',system-ui,sans-serif}
-    .phone-frame{width:375px;height:812px;border-radius:44px;border:8px solid #1A1A1C;overflow:hidden;position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.25),0 0 0 2px rgba(0,0,0,0.08);background:#F8F8F8;flex-shrink:0}
-    .phone-frame::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#1A1A1C;border-radius:0 0 18px 18px;z-index:50}
-    .phone-scroll{height:100%;overflow-y:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-    .phone-scroll::-webkit-scrollbar{display:none}
-    .toggle-track{width:40px;height:22px;border-radius:11px;transition:background .2s;cursor:pointer;position:relative;flex-shrink:0}
-    .toggle-thumb{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-    .fade-in{animation:fadeIn .25s ease-out}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-    .config-scroll{max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:thin}
-    .config-scroll::-webkit-scrollbar{width:5px}
-    .config-scroll::-webkit-scrollbar-track{background:transparent}
-    .config-scroll::-webkit-scrollbar-thumb{background:#E3E4E5;border-radius:3px}
-    .highlight-pulse{animation:highlightPulse 2s ease-in-out infinite}
-    @keyframes highlightPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,113,220,0)}50%{box-shadow:0 0 0 4px rgba(0,113,220,0.15)}}
-    .card-divider{height:1px;background:#E3E4E5;margin:0 16px}
-    .info-card{border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.10),0 -1px 2px rgba(0,0,0,0.05)}
-    .cta-pill{height:39px;border-radius:19.5px;background:#fff;border:1px solid #2E2F32;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#2E2F32;cursor:pointer}
-    .status-pill{height:24px;border-radius:2px;display:inline-flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600}
-    .tab-chip{height:39px;border-radius:19.5px;background:#004F9A;border:1px solid #2E2F32;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600}
-    .fab-btn{width:56px;height:56px;border-radius:28px;background:linear-gradient(180deg,#34B8FE 0%,#1946E8 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 5px rgba(0,0,0,0.15),0 -1px 3px rgba(0,0,0,0.10);position:absolute;right:16px;bottom:76px;z-index:10}
+    *{font-family:'Inter',sans-serif;box-sizing:border-box}
+    :root{--blue:#0053e2;--spark:#ffc220;--green:#2a8703;--red:#ea1100}
+    body{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+    .phone-wrap{background:#111827;border-radius:44px;padding:10px;box-shadow:0 32px 72px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+    .phone-screen{border-radius:36px;overflow:hidden;background:#f1f5f9;width:310px;height:648px;overflow-y:auto;scrollbar-width:none}
+    .phone-screen::-webkit-scrollbar{display:none}
+    .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .acc-body.open{max-height:700px}
+    .caret{transition:transform .2s}
+    .caret.open{transform:rotate(180deg)}
+    .comp-row{transition:border-color .15s;cursor:default}
+    .comp-row:hover{border-color:#0053e2}
+    .tab-btn{padding-bottom:8px;font-size:.8rem;font-weight:600;border-bottom:2px solid transparent;transition:all .15s;cursor:pointer}
+    .tab-btn.active{border-color:#0053e2;color:#0053e2}
+    .tab-btn:not(.active){color:#6b7280}
+    .tab-btn:not(.active):hover{color:#374151}
+    @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.45}}
+    .live-dot{animation:pulse-dot 2s infinite}
+    .toast{transform:translateY(80px);opacity:0;transition:all .3s ease;pointer-events:none}
+    .toast.show{transform:translateY(0);opacity:1}
+    .token-chip{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:1px 8px;font-size:.65rem;font-weight:600;cursor:pointer;transition:background .1s}
+    .token-chip:hover{background:#dbeafe}
+    .qa-chip label{transition:border-color .12s,background .12s}
+    .qa-chip label:has(input:checked){border-color:#0053e2;background:#eff6ff}
+    select,input[type=text],input[type=url]{transition:border-color .15s,box-shadow .15s}
+    select:focus,input[type=text]:focus,input[type=url]:focus{outline:none;border-color:#0053e2;box-shadow:0 0 0 3px rgba(0,83,226,.12)}
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useRef } = React;
+<body class="bg-gray-50">
 
-/* ═══════ ICONS ═══════ */
-const I={
-  Menu:()=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
-  Chat:()=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-  ChevronRight:({s=16,c='#999'})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
-  Clock:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  Users:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  MapPin:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
-  Calendar:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-  Tag:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
-  Type:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>,
-  Zap:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-  BarChart:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>,
-  Layers:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
-  AlertCircle:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-  CheckCircle:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-  Hash:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>,
-  Star:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-  Box:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>,
-  Utensils:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg>,
-  MoreH:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>,
-  Home:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
-  Clipboard:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
-  UsersTeam:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Store:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>,
-  Truck:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
-  Info:({s=14})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
-  Plus:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  X:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-  ArrowUp:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>,
-  ArrowDown:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>,
-  Copy:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
-  Download:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  Refresh:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
-  Meal:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3m0 0v7" stroke="currentColor" fill="none" strokeWidth="2"/></svg>,
-  Pencil:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>,
-  TextCursor:({s=15})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 22h-1a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h1"/><path d="M7 22h1a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4H7"/><line x1="7" y1="12" x2="17" y2="12"/></svg>,
-};
-
-/* ═══════ FIELD REGISTRY (7 card fields) ═══════ */
-const FIELD_REGISTRY = {
-  eyebrow:      { id:'eyebrow',      label:'Eyebrow (Goal Name)',    icon:I.Tag,    defaultValue:'Stock Fresh',            placeholder:'e.g. Goal name, Category label' },
-  actionName:   { id:'actionName',   label:'Action Name',            icon:I.Type,   defaultValue:'Stock D80 Service Deli', placeholder:'e.g. Stock D80 Service Deli' },
-  description:  { id:'description',  label:'Action Description',     icon:I.Info,   defaultValue:'',                       placeholder:'Optional description text...' },
-  attributes:   { id:'attributes',   label:'Attributes',             icon:I.Layers, defaultValue:'Time::25h (1,190 cases)||Location::Aisle A2-2', placeholder:'' },
-  messaging:    { id:'messaging',    label:'Messaging',              icon:I.Zap,    defaultValue:'Get started',            placeholder:'CTA label or message text' },
-};
-
-const DEFAULT_FIELDS = ['eyebrow','actionName','description','attributes','messaging'];
-
-
-function Toggle({checked,onChange}){return <div className={`toggle-track ${checked?'bg-walmart-blue':'bg-walmart-gray-200'}`} onClick={()=>onChange(!checked)}><div className="toggle-thumb" style={{left:checked?'20px':'2px'}}/></div>}
-
-/* ═══════ SINGLE ACTION CARD (in phone) ═══════ */
-function ActionCard({ fields, highlighted }) {
-  const active = fields.filter(f=>f.enabled);
-  const g = id => active.find(f=>f.id===id);
-  const eye=g('eyebrow'), name=g('actionName'), desc=g('description');
-  const attrs=g('attributes'), msg=g('messaging');
-  const attrList = attrs ? attrs.value.split('||').filter(raw=>{const idx=raw.indexOf('::');const val=idx>-1?raw.slice(idx+2):raw;return val.trim()}) : [];
-  const parseAttr=s=>{const idx=s.indexOf('::');return idx>-1?{label:s.slice(0,idx),val:s.slice(idx+2)}:{label:'',val:s}};
-
-  return (
-    <div className={`bg-white px-4 py-3 ${highlighted?'highlight-pulse ring-2 ring-walmart-blue/30 rounded-lg relative z-10':''}`}>
-      {eye&&eye.value&&<span className="text-[12px] font-medium block mb-1" style={{color:'#515357'}}>{eye.value}</span>}
-      {name&&name.value&&<h3 className="text-[15px] font-bold leading-tight" style={{color:'#2E2F32'}}>{name.value}</h3>}
-      {desc&&desc.value&&<p className="text-[12px] mt-1.5 leading-relaxed" style={{color:'#74767C'}}>{desc.value}</p>}
-      {attrList.length>0&&<div className="space-y-1 mt-1.5">
-        {attrList.map((raw,i)=>{const{label:lbl,val}=parseAttr(raw);return(
-          <div key={i} className="flex items-center gap-1.5">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span className="text-[13px]" style={{color:'#515357'}}>{lbl?<><span style={{color:'#74767C'}}>{lbl}:</span> {val}</>:val}</span>
-          </div>
-        )})}
-      </div>}
-      {msg&&msg.value&&<div className="mt-3"><button className="cta-pill w-full">{msg.value}</button></div>}
+<!-- ══ TOP NAV ══ -->
+<header class="bg-white border-b border-gray-200 px-6 flex items-center justify-between h-14 flex-shrink-0 z-20">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm" style="background:#0053e2">S</div>
+    <div>
+      <div class="text-sm font-bold text-gray-900 leading-none tracking-tight">Sidekick Studio</div>
+      <div class="text-xs text-gray-400 mt-0.5">Action Card Builder · For You</div>
     </div>
-  );
-}
-
-/* ═══════ STATIC PEER CARDS (other actions in the list) ═══════ */
-function StaticCard({ cat, title, meta, badge, badgeColor, moreBtn }) {
-  const PILL_COLORS={'Active alarm':{bg:'#FCE8E9',text:'#9B1419'},'Urgent':{bg:'#FCE8E9',text:'#9B1419'},'Overdue':{bg:'#FCE8E9',text:'#9B1419'},'Due today':{bg:'#F1F1F2',text:'#515357'},'New':{bg:'#E6F1FC',text:'#0071DC'},'New updates':{bg:'#E6F1FC',text:'#0071DC'}};
-  const bC = badgeColor || PILL_COLORS[badge] || {bg:'#F1F1F2',text:'#515357'};
-  return (
-    <div className="bg-white px-4 py-3">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[12px] font-medium" style={{color:'#515357'}}>{cat}</span>
-        <div className="flex items-center gap-2">
-          {badge&&<span className="status-pill" style={{background:bC.bg,color:bC.text}}>{badge}</span>}
-          {moreBtn&&<button className="flex items-center justify-center" style={{width:39,height:23,borderRadius:19.5,border:'1px solid #E3E4E5'}}><I.MoreH/></button>}
-        </div>
-      </div>
-      <h3 className="text-[15px] font-bold leading-tight mb-1.5" style={{color:'#2E2F32'}}>{title}</h3>
-      <div className="space-y-1">
-        {meta.map((m,i)=><div key={i} className="flex items-center gap-1.5"><span className="text-[13px]" style={{color:'#515357'}}>{m}</span></div>)}
-      </div>
-      <div className="mt-3"><button className="cta-pill w-full">Get started</button></div>
+    <span class="ml-1 px-2 py-0.5 rounded-full text-xs font-bold text-white" style="background:#0053e2">BETA</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5 text-xs text-gray-400 mr-2">
+      <span class="w-2 h-2 rounded-full bg-amber-400 live-dot inline-block"></span>Unsaved draft
     </div>
-  );
-}
+    <button onclick="saveDraft()" class="px-4 py-1.5 rounded-lg border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition">Save Draft</button>
+    <button onclick="publish()" class="px-4 py-1.5 rounded-lg text-white font-bold text-sm transition" style="background:#0053e2" onmouseover="this.style.background='#003ab5'" onmouseout="this.style.background='#0053e2'">Publish →</button>
+  </div>
+</header>
 
-/* ═══════ FULL PHONE SCREEN ═══════ */
-function PhoneScreen({ fields, actionCards, activeCardIdx }) {
-  return (
-    <div className="phone-frame">
-      <div className="phone-scroll" style={{background:'#F8F8F8'}}>
-        {/* ── Blue header (124px) ── */}
-        <div style={{background:'#0071DC',height:124,position:'relative'}}>
-          {/* Status bar */}
-          <div className="flex items-center justify-between px-6 pt-3">
-            <span className="text-[13px] font-semibold text-white">9:41</span>
-            <div className="flex items-center gap-1.5">
-              <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx=".5" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx=".5" opacity=".5"/><rect x="9" y="1" width="3" height="11" rx=".5" opacity=".7"/><rect x="13.5" y="0" width="2.5" height="12" rx=".5"/></svg>
-              <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5C5.2 1.5 3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity=".5"/><path d="M7.5 6.8C8.6 6.8 9.5 7.2 10.2 7.9L11.6 6.5C10.5 5.5 9.1 4.8 7.5 4.8C5.9 4.8 4.5 5.5 3.4 6.5L4.8 7.9C5.5 7.2 6.4 6.8 7.5 6.8Z"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
-              <div className="w-6 h-3 border border-white/60 rounded-sm relative"><div className="absolute inset-0.5 bg-white rounded-[1px]" style={{width:'70%'}}/></div>
+<!-- ══ MAIN ══ -->
+<main class="flex flex-1 overflow-hidden">
+
+  <!-- ════ LEFT PANEL ════ -->
+  <aside class="w-[22rem] bg-white border-r border-gray-200 flex flex-col overflow-hidden flex-shrink-0">
+    <!-- Tabs -->
+    <div class="flex gap-5 border-b border-gray-200 px-5 pt-3 flex-shrink-0">
+      <button class="tab-btn active" id="tab-components" onclick="switchTab('components')">Components</button>
+      <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')">Settings</button>
+      <button class="tab-btn" id="tab-api" onclick="switchTab('api')">Integrations</button>
+    </div>
+
+    <!-- Scroll area -->
+    <div class="flex-1 overflow-y-auto p-4" id="left-scroll">
+
+      <!-- ── COMPONENTS TAB ── -->
+      <div id="panel-components">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Card Sections</p>
+
+        <!-- Hero Card -->
+        <div class="comp-row border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm mb-2">
+          <div class="flex items-center gap-3 px-4 py-3 cursor-pointer select-none" onclick="toggleAcc('hero')">
+            <span class="text-base">🤖</span>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-semibold text-gray-800">Hero Card</div>
+              <div class="text-xs text-gray-400 truncate">AI greeting · check-in CTA · status</div>
             </div>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold shrink-0">Always On</span>
+            <svg class="w-4 h-4 text-gray-400 caret shrink-0" id="caret-hero" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </div>
-          {/* Nav row */}
-          <div className="flex items-center justify-between px-4 mt-2">
-            <div className="flex items-center gap-3">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-              <span className="text-[18px] font-bold text-white">For You</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <div className="relative">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold" style={{background:'#CCE3F8',color:'#041E42'}}>DJ</div>
-                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style={{background:'#6DD400',borderColor:'#F8F8F8'}}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Greeting / illustration area ── */}
-        <div style={{background:'#0071DC',padding:'16px 16px 0',position:'relative',overflow:'hidden'}}>
-          <div className="relative" style={{minHeight:80}}>
-            <div>
-              <p className="text-[12px] text-white/80">Good morning,</p>
-              <h2 className="text-[20px] font-bold text-white mt-0.5">Darnelle!</h2>
-            </div>
-            {/* Decorative illustration placeholder */}
-            <div className="absolute right-0 top-0" style={{width:140,height:80,opacity:0.3}}>
-              <svg viewBox="0 0 140 80" fill="none"><circle cx="70" cy="40" r="30" fill="white" opacity="0.3"/><circle cx="110" cy="50" r="20" fill="white" opacity="0.2"/><circle cx="40" cy="55" r="15" fill="white" opacity="0.25"/></svg>
-            </div>
-          </div>
-          {/* Clocked in card */}
-          <div className="mt-2 rounded-xl p-3" style={{background:'rgba(255,255,255,0.12)',border:'1px solid rgba(255,255,255,0.15)'}}>
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="w-2 h-2 rounded-full" style={{background:'#6DD400'}}></span>
-              <span className="text-[12px] text-white font-medium">Clocked in</span>
-            </div>
-            <h3 className="text-[15px] font-bold text-white leading-tight">Food & Consumables TL</h3>
-            <div className="mt-2 space-y-0.5">
-              <div className="flex items-center gap-1.5 text-white/80"><I.Clock s={12}/><span className="text-[11px]">Today, 7:30am - 4:00pm</span></div>
-              <div className="flex items-center gap-1.5 text-white/80"><I.Meal/><span className="text-[11px]">12:00pm - 12:30pm</span></div>
-              <div className="flex items-center gap-1.5 text-white/80"><I.Store/><span className="text-[11px]">Store #972</span></div>
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <button className="px-4 rounded-full text-[11px] font-bold flex items-center gap-1.5" style={{height:39,borderRadius:19.5,background:'#FFC220',color:'#2E2F32'}}><I.Utensils/>Start meal</button>
-              <button className="px-4 rounded-full text-[11px] font-semibold flex items-center gap-1.5" style={{height:39,borderRadius:19.5,background:'rgba(255,255,255,0.15)',color:'white',border:'1px solid rgba(255,255,255,0.3)'}}><I.Clock s={12}/>Clock out</button>
-              <button className="flex items-center justify-center" style={{width:39,height:39,borderRadius:19.5,background:'rgba(255,255,255,0.15)',border:'1px solid rgba(255,255,255,0.3)',color:'white'}}><I.MoreH/></button>
-            </div>
-          </div>
-
-          {/* Tab chips nav band */}
-          <div className="flex items-center gap-3 mt-4 pb-4">
-            <button className="tab-chip flex-1 gap-1.5" style={{background:'#004F9A'}}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              For you
-            </button>
-            <button className="tab-chip flex-1 gap-1.5" style={{background:'#004F9A'}}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Today's plan
-            </button>
-            <button className="tab-chip" style={{width:39,flexShrink:0,background:'#004F9A'}}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-            </button>
-          </div>
-        </div>
-
-        {/* ── Your actions section (white bg) ── */}
-        <div style={{background:'#fff'}}>
-          {/* Section header */}
-          <div className="px-4 pt-4 pb-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-[16px] font-bold" style={{color:'#2E2F32'}}>Your actions <span className="font-normal" style={{color:'#74767C'}}>(12)</span></h2>
-              <div className="flex items-center gap-1">
-                <span className="text-[12px] font-semibold" style={{color:'#0071DC'}}>View all</span>
-                <I.ChevronRight s={14} c="#0071DC"/>
-              </div>
-            </div>
-            <p className="text-[11px] mt-0.5" style={{color:'#74767C'}}>Your personalized actions, ordered by impact.</p>
-            {/* Info pill */}
-            <div className="flex items-center gap-1.5 mt-3 px-3 py-2 rounded-full" style={{background:'#E6F1FC'}}>
-              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{background:'linear-gradient(180deg,#34B8FE,#1946E8)'}}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <span className="text-[11px] font-medium" style={{color:'#0071DC'}}>Actions assigned for maximum customer value.</span>
-            </div>
-          </div>
-
-          {/* ── Action cards list (flat, separated by dividers) ── */}
-          <div className="mt-2">
-            {/* Static: Refrigeration alarm */}
-            <StaticCard cat="Refrigeration alarm" title="High Temperature Alarm in Produce A2-2" badge="Active alarm" moreBtn={true} meta={['Aisle A2-2']} />
-            <div className="card-divider"/>
-
-            {/* ★ CONFIGURABLE ACTION CARDS ★ */}
-            {(actionCards||[fields]).map((cardFields,idx)=>(
-              <React.Fragment key={idx}>
-                <ActionCard fields={cardFields} highlighted={idx===activeCardIdx} />
-                <div className="card-divider"/>
-              </React.Fragment>
-            ))}
-
-            {/* Static cards */}
-            <StaticCard cat="Notes" title="Fix DSL labels in A24" badge="Due today" meta={['Daily tour']} />
-            <div className="card-divider"/>
-            <StaticCard cat="Notes" title="Clean underneath produce bins" badge="Due today" meta={['Daily tour','Me, Jordan Taylor']} />
-            <StaticCard cat="Learning" title="Hazardous waste foundations" badge="Overdue" meta={['Store essentials']} />
-          </div>
-        </div>
-
-        {/* ── Gray spacer ── */}
-        <div style={{height:8,background:'#F8F8F8'}}/>
-
-        {/* ── Things to know section (white bg) ── */}
-        <div style={{background:'#fff',paddingBottom:80}}>
-          <div className="px-4 pt-4 pb-3">
-            <h2 className="text-[16px] font-bold" style={{color:'#2E2F32'}}>Things to know</h2>
-          </div>
-          <div className="px-4 space-y-4">
-            {/* Store updates */}
-            <div className="info-card p-4">
-              <p className="text-[14px] font-bold" style={{color:'#2E2F32'}}>Store updates <span className="font-normal" style={{color:'#74767C'}}>(6)</span></p>
-              <p className="text-[12px] mt-1" style={{color:'#515357'}}>New AMP messages for your team or store to view and act on this week.</p>
-              <div style={{height:1,background:'#D9D9D9',margin:'12px 0'}}/>
-              <button className="cta-pill w-full">View store updates</button>
-            </div>
-            {/* My updates */}
-            <div className="info-card p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[14px] font-bold" style={{color:'#2E2F32'}}>My updates <span className="font-normal" style={{color:'#74767C'}}>(87)</span></p>
-                <span className="status-pill" style={{background:'#E6F1FC',color:'#0071DC'}}>New updates</span>
-              </div>
-              <p className="text-[12px] mt-1" style={{color:'#515357'}}>See updates just for you</p>
-              <div style={{height:1,background:'#D9D9D9',margin:'12px 0'}}/>
-              <button className="cta-pill w-full">View my updates</button>
-            </div>
-            {/* Today's freight */}
-            <div className="info-card p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-[14px] font-bold" style={{color:'#2E2F32'}}>Today's freight</p>
-                  <p className="text-[12px] mt-1" style={{color:'#515357'}}>See trucks arriving in your store today.</p>
-                  <div style={{height:1,background:'#D9D9D9',margin:'12px 0'}}/>
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <I.Truck/><span className="text-[12px] font-medium" style={{color:'#2E2F32'}}>3 of 5 warehouse trucks arrived</span>
-                  </div>
+          <div class="acc-body" id="acc-hero">
+            <div class="px-4 pb-4 pt-2 space-y-3 border-t border-gray-100">
+              <div>
+                <label class="text-xs font-semibold text-gray-600 block mb-1">Greeting Text</label>
+                <input id="greetingText" type="text" value="Good {timeOfDay}, {firstName} 👋" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" oninput="updatePreview()"/>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span class="token-chip" onclick="insertToken('{firstName}')">+ {firstName}</span>
+                  <span class="token-chip" onclick="insertToken('{timeOfDay}')">+ {timeOfDay}</span>
+                  <span class="token-chip" onclick="insertToken('{role}')">+ {role}</span>
+                  <span class="token-chip" onclick="insertToken('{storeId}')">+ {storeId}</span>
                 </div>
-                <div className="flex-shrink-0 ml-3 w-20 h-20 rounded-full flex items-center justify-center" style={{background:'#D3EFF8'}}>
-                  <I.Truck/>
-                </div>
-              </div>
-              <button className="cta-pill w-full">View freight details</button>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Bottom tab bar (68px) ── */}
-        <div className="sticky bottom-0 flex items-center justify-around px-4" style={{height:68,background:'#fff',boxShadow:'0 -5px 10px rgba(0,0,0,0.05)'}}>
-          <div className="flex flex-col items-center gap-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#0071DC" stroke="#0071DC" strokeWidth="0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            <span className="text-[10px] font-semibold" style={{color:'#0071DC'}}>For you</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span className="text-[10px]" style={{color:'#74767C'}}>Today's plan</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span className="text-[10px]" style={{color:'#74767C'}}>Your team</span>
-          </div>
-        </div>
-
-        {/* ── FAB button ── */}
-        <div className="fab-btn" style={{position:'sticky',bottom:76,marginLeft:'auto',marginRight:16,marginTop:-56}}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-
-        <div style={{height:8,background:'#fff'}}/>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════ CONFIG: FIELD ROW ═══════ */
-function FieldRow({ field, index, total, onUpdate, onMove }) {
-  const reg = FIELD_REGISTRY[field.id];
-  const Icon = reg.icon;
-  const label = reg.label;
-  const placeholder = reg.placeholder;
-  const isOptional = ['description','attributes','messaging'].includes(field.id);
-
-  return (
-    <div className={`rounded-xl border ${field.enabled?'border-walmart-gray-100 bg-white':'border-walmart-gray-100 bg-walmart-gray-50 opacity-50'} p-3 fade-in`}>
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-0.5 mr-0.5">
-          <button onClick={()=>onMove(index,-1)} disabled={index===0} className="text-walmart-gray-300 hover:text-walmart-gray-600 disabled:opacity-20 p-0.5"><I.ArrowUp/></button>
-          <button onClick={()=>onMove(index,1)} disabled={index===total-1} className="text-walmart-gray-300 hover:text-walmart-gray-600 disabled:opacity-20 p-0.5"><I.ArrowDown/></button>
-        </div>
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${field.enabled?'bg-walmart-blue-light text-walmart-blue':'bg-walmart-gray-100 text-walmart-gray-400'}`}><Icon s={14}/></div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide">{label}{isOptional&&<span className="text-walmart-gray-300 normal-case font-normal ml-1">(optional)</span>}</span>
-            {field.id==='eyebrow'?
-              <span className="text-[10px] text-walmart-gray-300 italic">conditional</span>
-            :
-              <Toggle checked={field.enabled} onChange={v=>onUpdate({...field,enabled:v})}/>
-            }
-          </div>
-          {field.enabled && (
-            field.id==='attributes' ? (()=>{
-              const parts=field.value?field.value.split('||'):[];
-              const parse=s=>{const idx=s.indexOf('::');return idx>-1?{label:s.slice(0,idx),val:s.slice(idx+2)}:{label:'',val:s}};
-              const serialize=(lbl,val)=>lbl?lbl+'::'+val:val;
-              const updateAt=(i,lbl,val)=>{const p=[...parts];p[i]=serialize(lbl,val);onUpdate({...field,value:p.join('||')})};
-              const removeAt=i=>{const p=parts.filter((_,j)=>j!==i);onUpdate({...field,value:p.join('||')})};
-              const addAttr=()=>onUpdate({...field,value:field.value+(field.value?'||':'')+''});
-              return <div className="space-y-2.5">
-                {parts.map((raw,i)=>{const {label:lbl,val}=parse(raw); return (
-                  <div key={i} className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <input type="text" value={lbl} onChange={e=>updateAt(i,e.target.value,val)} placeholder="Label (e.g. Time, Location)" className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide bg-transparent border-b border-dashed border-walmart-gray-200 focus:border-walmart-blue focus:outline-none pb-0.5 w-40"/>
-                      <button onClick={()=>removeAt(i)} className="text-walmart-gray-300 hover:text-walmart-error p-0.5 flex-shrink-0"><I.X/></button>
-                    </div>
-                    <input type="text" value={val} onChange={e=>updateAt(i,lbl,e.target.value)} placeholder="Enter value..." className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-                  </div>
-                )})}
-                <button onClick={addAttr} className="w-full py-1.5 rounded-lg border border-dashed border-walmart-gray-200 text-[11px] font-semibold text-walmart-gray-400 hover:border-walmart-blue hover:text-walmart-blue transition-all flex items-center justify-center gap-1"><I.Plus/> Add attribute</button>
-              </div>
-            })() :
-              <input type="text" value={field.value} onChange={e=>onUpdate({...field,value:e.target.value})} placeholder={placeholder} className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════ DEFAULT DETAILS STATE ═══════ */
-const DEFAULT_DETAILS = {
-  actionName: 'Action name',
-  location: 'D8 Pets',
-  steps: [
-    {label:'Step label',bullets:['Supporting bullet','Supporting bullet','Supporting bullet']},
-    {label:'Step label',bullets:['Supporting bullet','Supporting bullet','Supporting bullet']},
-    {label:'Step label',bullets:['Supporting bullet','Supporting bullet','Supporting bullet']},
-    {label:'Step label',bullets:['Supporting bullet','Supporting bullet','Supporting bullet']},
-  ],
-  teamResponsible: 'Stocking 1',
-  assignedName: 'Alex Carter',
-  assignedRole: 'Role or position',
-  helpfulTools: [{name:'Item information',desc:'Scan items to find their locations and more.'}],
-  doneWhen: 'All new freight in the assigned area is stocked.',
-};
-
-/* ═══════ ACTION DETAILS PHONE PREVIEW ═══════ */
-function DetailsPhoneScreen({ d }) {
-  return (
-    <div className="phone-frame">
-      <div className="phone-scroll" style={{background:'#fff'}}>
-        {/* Blue header */}
-        <div style={{background:'#0071DC'}}>
-          <div className="flex items-center justify-between px-6 pt-3">
-            <span className="text-[13px] font-semibold text-white">9:41</span>
-            <div className="flex items-center gap-1.5">
-              <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx=".5" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx=".5" opacity=".5"/><rect x="9" y="1" width="3" height="11" rx=".5" opacity=".7"/><rect x="13.5" y="0" width="2.5" height="12" rx=".5"/></svg>
-              <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5C5.2 1.5 3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity=".5"/><path d="M7.5 6.8C8.6 6.8 9.5 7.2 10.2 7.9L11.6 6.5C10.5 5.5 9.1 4.8 7.5 4.8C5.9 4.8 4.5 5.5 3.4 6.5L4.8 7.9C5.5 7.2 6.4 6.8 7.5 6.8Z"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
-              <div className="w-6 h-3 border border-white/60 rounded-sm relative"><div className="absolute inset-0.5 bg-white rounded-[1px]" style={{width:'70%'}}/></div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-4 pt-3 pb-4">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <span className="text-[17px] font-bold text-white">Action Details</span>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="px-4 pt-5 pb-4">
-          {/* 1. Action name */}
-          <h1 className="text-[22px] font-bold leading-tight" style={{color:'#2E2F32'}}>{d.actionName}</h1>
-          {/* 2. Location or time attribute */}
-          {d.location && (
-            <div className="flex items-center gap-2 mt-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span className="text-[14px]" style={{color:'#515357'}}>{d.location}</span>
-            </div>
-          )}
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* 3. Steps to succeed */}
-        <div className="px-4 py-4">
-          <p className="text-[14px] font-bold mb-3" style={{color:'#2E2F32'}}>Steps to succeed</p>
-          <div className="space-y-4">
-            {d.steps.map((step,si)=>(
-              <div key={si}>
-                <p className="text-[14px] font-medium mb-1.5" style={{color:'#2E2F32'}}>{si+1}. {step.label}</p>
-                <div className="space-y-1 pl-4">
-                  {step.bullets.map((b,bi)=>(
-                    <div key={bi} className="flex items-start gap-2">
-                      <span className="text-[13px] mt-0.5" style={{color:'#74767C'}}>&#8226;</span>
-                      <span className="text-[13px]" style={{color:'#515357'}}>{b}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* 4. Teams responsible */}
-        <div className="px-4 py-4">
-          <p className="text-[14px] font-bold mb-3" style={{color:'#2E2F32'}}>Teams responsible</p>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background:'#E6F1FC'}}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0071DC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <span className="text-[14px]" style={{color:'#2E2F32'}}>{d.teamResponsible}</span>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* 5. Assigned to */}
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[14px] font-bold" style={{color:'#2E2F32'}}>Assigned to</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold" style={{background:'#E8E8E8',color:'#515357'}}>
-                {d.assignedName.split(' ').map(n=>n[0]).join('').slice(0,2)}
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white" style={{background:'#6DD400'}}/>
-            </div>
-            <div>
-              <p className="text-[14px] font-bold" style={{color:'#2E2F32'}}>{d.assignedName}</p>
-              <p className="text-[12px]" style={{color:'#74767C'}}>{d.assignedRole}</p>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* 6. Helpful tools */}
-        <div className="px-4 py-4">
-          <p className="text-[14px] font-bold mb-3" style={{color:'#2E2F32'}}>Helpful tools</p>
-          {d.helpfulTools.map((t,i)=>(
-            <div key={i} className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{background:'#E6F1FC'}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0071DC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="6" y1="4" x2="6" y2="20"/><line x1="10" y1="4" x2="10" y2="20"/><line x1="14" y1="4" x2="14" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
               </div>
               <div>
-                <p className="text-[14px] font-medium" style={{color:'#0071DC',textDecoration:'underline'}}>{t.name}</p>
-                <p className="text-[12px]" style={{color:'#74767C'}}>{t.desc}</p>
+                <label class="text-xs font-semibold text-gray-600 block mb-1">Primary CTA Label</label>
+                <input id="ctaLabel" type="text" value="Check In" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" oninput="updatePreview()"/>
               </div>
-            </div>
-          ))}
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* 7. You'll know you're done when */}
-        <div className="px-4 py-4 pb-6">
-          <p className="text-[14px] font-bold mb-3" style={{color:'#2E2F32'}}>You'll know you're done when...</p>
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{background:'#E6F1FC'}}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0071DC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <p className="text-[14px] leading-relaxed pt-2" style={{color:'#2E2F32'}}>{d.doneWhen}</p>
-          </div>
-        </div>
-
-        <div style={{height:80}}/>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════ DETAILS CONFIG: STEP EDITOR ═══════ */
-function StepEditor({ step, index, total, onChange, onRemove, onMove }) {
-  const updateLabel=v=>onChange({...step,label:v});
-  const updateBullet=(bi,v)=>onChange({...step,bullets:step.bullets.map((b,j)=>j===bi?v:b)});
-  const addBullet=()=>onChange({...step,bullets:[...step.bullets,'']});
-  const removeBullet=bi=>onChange({...step,bullets:step.bullets.filter((_,j)=>j!==bi)});
-  return (
-    <div className="rounded-xl border border-walmart-gray-100 bg-white p-3 fade-in">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex flex-col gap-0.5 mr-0.5">
-          <button onClick={()=>onMove(index,-1)} disabled={index===0} className="text-walmart-gray-300 hover:text-walmart-gray-600 disabled:opacity-20 p-0.5"><I.ArrowUp/></button>
-          <button onClick={()=>onMove(index,1)} disabled={index===total-1} className="text-walmart-gray-300 hover:text-walmart-gray-600 disabled:opacity-20 p-0.5"><I.ArrowDown/></button>
-        </div>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-walmart-blue-light text-walmart-blue text-[12px] font-bold">{index+1}</div>
-        <input type="text" value={step.label} onChange={e=>updateLabel(e.target.value)} placeholder="Step label" className="flex-1 text-sm font-semibold border border-walmart-gray-200 rounded-lg px-3 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-        <button onClick={onRemove} className="text-walmart-gray-300 hover:text-walmart-error p-0.5"><I.X/></button>
-      </div>
-      <div className="pl-10 space-y-1.5">
-        {step.bullets.map((b,bi)=>(
-          <div key={bi} className="flex items-center gap-2">
-            <span className="text-walmart-gray-300 text-xs">&#8226;</span>
-            <input type="text" value={b} onChange={e=>updateBullet(bi,e.target.value)} placeholder="Supporting bullet" className="flex-1 text-[13px] border border-walmart-gray-200 rounded-lg px-2.5 py-1 text-walmart-gray-600 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-            <button onClick={()=>removeBullet(bi)} className="text-walmart-gray-300 hover:text-walmart-error p-0.5"><I.X/></button>
-          </div>
-        ))}
-        <button onClick={addBullet} className="text-[11px] text-walmart-blue font-semibold hover:underline flex items-center gap-1 pl-3"><I.Plus/> Add bullet</button>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════ DETAILS CONFIG: TOOL EDITOR ═══════ */
-function ToolEditor({ tool, index, onChange, onRemove }) {
-  return (
-    <div className="rounded-xl border border-walmart-gray-100 bg-white p-3 fade-in">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-walmart-blue-light text-walmart-blue"><I.Zap s={14}/></div>
-        <input type="text" value={tool.name} onChange={e=>onChange({...tool,name:e.target.value})} placeholder="Tool name" className="flex-1 text-sm font-semibold border border-walmart-gray-200 rounded-lg px-3 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-        <button onClick={onRemove} className="text-walmart-gray-300 hover:text-walmart-error p-0.5"><I.X/></button>
-      </div>
-      <div className="pl-10">
-        <input type="text" value={tool.desc} onChange={e=>onChange({...tool,desc:e.target.value})} placeholder="Tool description" className="w-full text-[13px] border border-walmart-gray-200 rounded-lg px-2.5 py-1 text-walmart-gray-600 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════ DEFAULT GOAL STATE ═══════ */
-const DEFAULT_GOALS = {
-  goalName: 'Goal name',
-  shortDescription: '',
-};
-
-const GOAL_ICONS = {
-  warning: (s=36)=><svg width={s} height={s} viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><path d="M24 14l10 18H14L24 14z" fill="#F57C00" stroke="#E65100" strokeWidth="1.5"/><rect x="22.5" y="21" width="3" height="6" rx="1" fill="white"/><circle cx="24" cy="30" r="1.5" fill="white"/></svg>,
-  tools: (s=36)=><svg width={s} height={s} viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF8E1"/><rect x="15" y="20" width="18" height="12" rx="2" fill="#FFC220" stroke="#E6A800" strokeWidth="1"/><rect x="21" y="16" width="6" height="5" rx="1" fill="none" stroke="#E6A800" strokeWidth="1.5"/><line x1="20" y1="24" x2="28" y2="24" stroke="#E6A800" strokeWidth="1.5"/></svg>,
-  scanner: (s=36)=><svg width={s} height={s} viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#E6F1FC"/><rect x="16" y="14" width="16" height="20" rx="2" fill="#0071DC" opacity="0.15" stroke="#0071DC" strokeWidth="1.2"/><line x1="19" y1="20" x2="29" y2="20" stroke="#0071DC" strokeWidth="1.2"/><line x1="19" y1="24" x2="29" y2="24" stroke="#0071DC" strokeWidth="1.2"/><line x1="19" y1="28" x2="25" y2="28" stroke="#0071DC" strokeWidth="1.2"/></svg>,
-  notes: (s=36)=><svg width={s} height={s} viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#FFF3E0"/><rect x="16" y="13" width="16" height="22" rx="2" fill="none" stroke="#F57C00" strokeWidth="1.5"/><line x1="20" y1="19" x2="28" y2="19" stroke="#F57C00" strokeWidth="1.2"/><line x1="20" y1="23" x2="28" y2="23" stroke="#F57C00" strokeWidth="1.2"/><line x1="20" y1="27" x2="24" y2="27" stroke="#F57C00" strokeWidth="1.2"/></svg>,
-};
-
-/* ═══════ GOAL PHONE SCREEN ═══════ */
-function GoalPhoneScreen({ g }) {
-  return (
-    <div className="phone-frame">
-      <div className="phone-scroll" style={{background:'#fff'}}>
-        {/* Status bar */}
-        <div className="flex items-center justify-between px-6 pt-3 pb-1">
-          <span className="text-[13px] font-semibold" style={{color:'#2E2F32'}}>9:41</span>
-          <div className="flex items-center gap-1.5">
-            <svg width="16" height="12" viewBox="0 0 16 12" fill="#2E2F32"><rect x="0" y="3" width="3" height="9" rx=".5" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx=".5" opacity=".5"/><rect x="9" y="1" width="3" height="11" rx=".5" opacity=".7"/><rect x="13.5" y="0" width="2.5" height="12" rx=".5"/></svg>
-            <svg width="15" height="12" viewBox="0 0 15 12" fill="#2E2F32"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5C5.2 1.5 3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity=".5"/><path d="M7.5 6.8C8.6 6.8 9.5 7.2 10.2 7.9L11.6 6.5C10.5 5.5 9.1 4.8 7.5 4.8C5.9 4.8 4.5 5.5 3.4 6.5L4.8 7.9C5.5 7.2 6.4 6.8 7.5 6.8Z"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
-            <div className="w-6 h-3 border rounded-sm relative" style={{borderColor:'#2E2F32'}}><div className="absolute inset-0.5 rounded-[1px]" style={{width:'70%',background:'#2E2F32'}}/></div>
-          </div>
-        </div>
-
-        {/* Track progress header */}
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-[22px] font-bold" style={{color:'#2E2F32'}}>Track progress</h1>
-          <p className="text-[13px] mt-1 leading-relaxed" style={{color:'#515357'}}>Review the progress of your team and adjust as needed based on your expertise.</p>
-        </div>
-
-        {/* View by toggle */}
-        <div className="px-4 pt-2 pb-4">
-          <div className="flex rounded-full overflow-hidden border" style={{borderColor:'#E3E4E5'}}>
-            <button className="flex-1 py-2.5 text-[13px] font-bold text-center" style={{background:'#fff',color:'#2E2F32'}}>View by work</button>
-            <button className="flex-1 py-2.5 text-[13px] font-medium text-center" style={{background:'#F8F8F8',color:'#74767C'}}>View by associate</button>
-          </div>
-        </div>
-
-        {/* Shift goals header */}
-        <div className="px-4 pt-1 pb-2">
-          <h2 className="text-[17px] font-bold" style={{color:'#2E2F32'}}>Shift goals <span className="font-normal" style={{color:'#74767C'}}>(3)</span></h2>
-        </div>
-
-        {/* Info pill */}
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-1.5 px-3 py-2 rounded-full" style={{background:'#F8F8F8'}}>
-            <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{background:'linear-gradient(180deg,#34B8FE,#1946E8)'}}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            </div>
-            <span className="text-[11px] font-medium" style={{color:'#515357'}}>Actions assigned for maximum customer value.</span>
-          </div>
-        </div>
-
-        {/* Static goal 1: Refrigeration alarms (error) */}
-        <div className="px-4 py-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">{(GOAL_ICONS.warning)(36)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>Refrigeration alarms</p>
-                <I.ChevronRight s={18} c="#74767C"/>
-              </div>
-              <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg" style={{background:'#FFF3E0'}}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#F57C00"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                <span className="text-[12px]" style={{color:'#515357'}}>Failed to load goal.</span>
-                <span className="text-[12px] font-semibold ml-1" style={{color:'#2E2F32',textDecoration:'underline'}}>Try again.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* ★ Configurable goal card (highlighted) ★ */}
-        <div className="highlight-pulse ring-2 ring-walmart-blue/30 rounded-lg relative z-10 mx-2">
-          <div className="px-4 py-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 mt-0.5">{(GOAL_ICONS.tools)(36)}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <p className="text-[15px] font-bold" style={{color:'#0071DC'}}>
-                    <span style={{color:'#0071DC'}}>&#10024; </span>{g.goalName || 'Goal name'}
-                  </p>
-                  <I.ChevronRight s={18} c="#74767C"/>
-                </div>
-                <p className="text-[14px] font-bold mt-1.5" style={{color:'#2E2F32'}}>25% complete</p>
-                <div className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" style={{background:'#E3E4E5'}}>
-                  <div className="h-full rounded-full" style={{width:'25%',background:'#0071DC'}}/>
-                </div>
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[13px]" style={{color:'#2E2F32'}}>10 actions complete</span>
-                  <span className="text-[12px]" style={{color:'#74767C'}}>30 left</span>
-                </div>
-                {g.shortDescription && <p className="text-[12px] mt-2 leading-relaxed" style={{color:'#74767C'}}>{g.shortDescription}</p>}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Static goal 3: VizPick */}
-        <div className="px-4 py-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-0.5">{(GOAL_ICONS.scanner)(36)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-[15px] font-bold" style={{color:'#0071DC'}}>
-                  <span style={{color:'#0071DC'}}>&#10024; </span>VizPick
-                </p>
-                <I.ChevronRight s={18} c="#74767C"/>
-              </div>
-              <p className="text-[14px] font-bold mt-1.5" style={{color:'#2E2F32'}}>40% complete</p>
-              <div className="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" style={{background:'#E3E4E5'}}>
-                <div className="h-full rounded-full" style={{width:'40%',background:'#0071DC'}}/>
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[13px]" style={{color:'#2E2F32'}}>9 actions complete</span>
-                <span className="text-[12px]" style={{color:'#74767C'}}>14 left</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Additional work header */}
-        <div className="px-4 pt-5 pb-2">
-          <h2 className="text-[17px] font-bold" style={{color:'#2E2F32'}}>Additional work <span className="font-normal" style={{color:'#74767C'}}>(3)</span></h2>
-          <p className="text-[12px] mt-1 leading-relaxed" style={{color:'#515357'}}>Use your expertise to decide when to do this work and communicate to your team.</p>
-        </div>
-
-        {/* Additional work 1: Daily tour notes */}
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">{(GOAL_ICONS.notes)(36)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>Daily tour notes</p>
-                <I.ChevronRight s={18} c="#74767C"/>
-              </div>
-              <p className="text-[13px] mt-0.5" style={{color:'#515357'}}>12 to do</p>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Additional work 2: 4x4 tour notes (error) */}
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">{(GOAL_ICONS.notes)(36)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>4x4 tour notes</p>
-              </div>
-              <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg" style={{background:'#FFF3E0'}}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#F57C00"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                <span className="text-[12px]" style={{color:'#515357'}}>Failed to load goal.</span>
-                <span className="text-[12px] font-semibold ml-1" style={{color:'#2E2F32',textDecoration:'underline'}}>Try again.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Additional work 3: Market tour notes */}
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">{(GOAL_ICONS.notes)(36)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>Market tour notes</p>
-                <I.ChevronRight s={18} c="#74767C"/>
-              </div>
-              <p className="text-[13px] mt-0.5" style={{color:'#515357'}}>3 to do</p>
-            </div>
-          </div>
-        </div>
-
-        <div style={{height:24}}/>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════ DEFAULT GOAL DETAILS STATE ═══════ */
-const DEFAULT_GOAL_DETAILS = {
-  goalTitle: 'Goal title',
-  showAttributes: true,
-  gdAttributes: [
-    {label:'Time',value:'31h (981 cases)'},
-    {label:'Location',value:'Aisle A2-2'},
-  ],
-  showProgress: true,
-  progressRows: [
-    {name:'Name/area',timeframe:'Timeframe',label:'Label'},
-    {name:'Name/area',timeframe:'Timeframe',label:'Label'},
-    {name:'Name/area',timeframe:'Timeframe',label:'Label'},
-  ],
-  showGoalActions: true,
-};
-
-/* ═══════ GOAL DETAILS PHONE SCREEN ═══════ */
-function GoalDetailsPhoneScreen({ gd }) {
-  return (
-    <div className="phone-frame">
-      <div className="phone-scroll" style={{background:'#fff'}}>
-        {/* Blue header */}
-        <div style={{background:'#0071DC'}}>
-          <div className="flex items-center justify-between px-6 pt-3">
-            <span className="text-[13px] font-semibold text-white">9:41</span>
-            <div className="flex items-center gap-1.5">
-              <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx=".5" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx=".5" opacity=".5"/><rect x="9" y="1" width="3" height="11" rx=".5" opacity=".7"/><rect x="13.5" y="0" width="2.5" height="12" rx=".5"/></svg>
-              <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5C5.2 1.5 3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity=".5"/><path d="M7.5 6.8C8.6 6.8 9.5 7.2 10.2 7.9L11.6 6.5C10.5 5.5 9.1 4.8 7.5 4.8C5.9 4.8 4.5 5.5 3.4 6.5L4.8 7.9C5.5 7.2 6.4 6.8 7.5 6.8Z"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
-              <div className="w-6 h-3 border border-white/60 rounded-sm relative"><div className="absolute inset-0.5 bg-white rounded-[1px]" style={{width:'70%'}}/></div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 px-4 pt-3 pb-4">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <span className="text-[17px] font-bold text-white">Goal Details</span>
-          </div>
-        </div>
-
-        {/* Goal title + image placeholder + attributes */}
-        <div className="px-4 pt-5 pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="text-[20px] font-bold" style={{color:'#2E2F32'}}>{gd.goalTitle || 'Goal title'}</h1>
-              {gd.showAttributes && gd.gdAttributes && gd.gdAttributes.map((attr,i)=>(
-                <div key={i} className="flex items-center gap-2 mt-2">
-                  {attr.label.toLowerCase().includes('time') ? (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  ) : attr.label.toLowerCase().includes('location') || attr.label.toLowerCase().includes('aisle') ? (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  ) : (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                  )}
-                  <span className="text-[13px]" style={{color:'#515357'}}>{attr.value || attr.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex-shrink-0 w-14 h-14 rounded-lg border-2 flex items-center justify-center" style={{borderColor:'#E3E4E5',background:'#F8F8F8'}}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C4C5C7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Progress breakdown */}
-        {gd.showProgress && gd.progressRows && gd.progressRows.length > 0 && (<>
-          <div className="px-4 pt-4 pb-4">
-            <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>[Progress breakdown title]</p>
-            <p className="text-[13px] mt-0.5" style={{color:'#74767C'}}>Description text</p>
-            <div className="mt-3 space-y-2.5">
-              {gd.progressRows.map((r,i)=>(
-                <div key={i} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[14px] font-semibold" style={{color:'#2E2F32'}}>{r.name}</p>
-                    <p className="text-[11px]" style={{color:'#74767C'}}>{r.timeframe}</p>
-                  </div>
-                  <span className="text-[13px] font-medium" style={{color:'#515357'}}>{r.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-        </>)}
-
-        {/* Static: Goal actions */}
-        {gd.showGoalActions && (<>
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-[15px] font-bold" style={{color:'#2E2F32'}}>Goal actions <span className="font-normal" style={{color:'#74767C'}}>(4)</span></p>
-          <p className="text-[13px] mt-1 leading-snug" style={{color:'#74767C'}}>Review and adjust assignments as needed. Actions are listed in priority order.</p>
-        </div>
-
-        {/* Static: Search + filters */}
-        <div className="px-4 py-2 flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-full border" style={{borderColor:'#E3E4E5'}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span className="text-[13px]" style={{color:'#74767C'}}>Search</span>
-          </div>
-        </div>
-        <div className="px-4 pb-2 flex items-center gap-2">
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full border" style={{borderColor:'#E3E4E5'}}>
-            <span className="text-[12px] font-medium" style={{color:'#2E2F32'}}>Status</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-        <div style={{height:1,background:'#E3E4E5',margin:'0 16px'}}/>
-
-        {/* Static: Assigned actions */}
-        <div className="px-4 pt-3 pb-4">
-          <p className="text-[14px] font-bold mb-2" style={{color:'#2E2F32'}}>Assigned actions <span className="font-normal" style={{color:'#74767C'}}>(5)</span></p>
-          <div style={{height:1,background:'#E3E4E5',marginBottom:8}}/>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-[13px]" style={{color:'#515357'}}>Select all actions</span>
-            <div className="w-5 h-5 border-2 rounded" style={{borderColor:'#E3E4E5'}}/>
-          </div>
-          <div style={{height:1,background:'#E3E4E5'}}/>
-          {[0,1].map(i=>(
-            <React.Fragment key={i}>
-              <div className="py-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-bold truncate" style={{color:'#2E2F32'}}>Stock Pallet ...130291</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      <span className="text-[12px]" style={{color:'#515357'}}>25h</span>
-                    </div>
-                    <div className="flex items-center gap-4 mt-0.5 ml-5">
-                      <span className="text-[11px]" style={{color:'#74767C'}}>(1,19...</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                      <span className="text-[12px]" style={{color:'#515357'}}>D8 Pets, D11 Hardware</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                      <span className="text-[12px]" style={{color:'#515357'}}>Alex Carter &rarr; Label</span>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0 w-5 h-5 border-2 rounded mt-1" style={{borderColor:'#E3E4E5'}}/>
-                </div>
-              </div>
-              {i===0 && <div style={{height:1,background:'#E3E4E5'}}/>}
-            </React.Fragment>
-          ))}
-        </div>
-        </>)}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════ EXPERIENCE BUILDER (4-tab editor) ═══════ */
-function ExperienceBuilder({ experience, onSave, onBack }) {
-  const [activeTab,setActiveTab]=useState('card');
-  const makeDefaultFields=()=>DEFAULT_FIELDS.map(id=>({id,enabled:true,value:FIELD_REGISTRY[id].defaultValue}));
-  const makeDefaultAction=()=>({
-    fields:makeDefaultFields(),
-    details:JSON.parse(JSON.stringify(DEFAULT_DETAILS)),
-    goals:JSON.parse(JSON.stringify(DEFAULT_GOALS)),
-    goalDetails:JSON.parse(JSON.stringify(DEFAULT_GOAL_DETAILS)),
-  });
-
-  const [actions,setActions]=useState(()=>{
-    if(experience.actions) return experience.actions;
-    if(experience.actionCards) return experience.actionCards.map(fields=>({fields,details:JSON.parse(JSON.stringify(DEFAULT_DETAILS)),goals:JSON.parse(JSON.stringify(DEFAULT_GOALS)),goalDetails:JSON.parse(JSON.stringify(DEFAULT_GOAL_DETAILS))}));
-    if(experience.fields) return [{fields:experience.fields,details:experience.details||JSON.parse(JSON.stringify(DEFAULT_DETAILS)),goals:experience.goals||JSON.parse(JSON.stringify(DEFAULT_GOALS)),goalDetails:experience.goalDetails||JSON.parse(JSON.stringify(DEFAULT_GOAL_DETAILS))}];
-    return [makeDefaultAction()];
-  });
-  const [activeCardIdx,setActiveCardIdx]=useState(0);
-  const cur=actions[activeCardIdx]||makeDefaultAction();
-  const fields=cur.fields;
-  const details=cur.details;
-  const goals=cur.goals;
-  const goalDetails=cur.goalDetails;
-
-  const updateAction=(updater)=>setActions(prev=>{const n=[...prev];n[activeCardIdx]=typeof updater==='function'?updater(n[activeCardIdx]):updater;return n;});
-  const setFields=(updater)=>updateAction(a=>({...a,fields:typeof updater==='function'?updater(a.fields):updater}));
-  const setDetails=(updater)=>updateAction(a=>({...a,details:typeof updater==='function'?updater(a.details):updater}));
-  const setGoals=(updater)=>updateAction(a=>({...a,goals:typeof updater==='function'?updater(a.goals):updater}));
-  const setGoalDetails=(updater)=>updateAction(a=>({...a,goalDetails:typeof updater==='function'?updater(a.goalDetails):updater}));
-
-  const ud=(k,v)=>setDetails(p=>({...p,[k]:v}));
-  const ug=(k,v)=>setGoals(p=>({...p,[k]:v}));
-  const ugd=(k,v)=>setGoalDetails(p=>({...p,[k]:v}));
-
-  const addActionCard=()=>{setActions(prev=>[...prev,makeDefaultAction()]);setActiveCardIdx(actions.length);};
-  const removeActionCard=(idx)=>{if(actions.length<=1)return;setActions(prev=>prev.filter((_,i)=>i!==idx));setActiveCardIdx(i=>i>=idx?Math.max(0,i-1):i);};
-  const [copied,setCopied]=useState(false);
-
-  const updateField=(i,u)=>setFields(p=>p.map((f,j)=>j===i?u:f));
-  const moveField=(i,d)=>setFields(p=>{const n=[...p];const t=i+d;if(t<0||t>=n.length)return p;[n[i],n[t]]=[n[t],n[i]];return n});
-  const resetCurrentAction=()=>updateAction(()=>makeDefaultAction());
-  const updateStep=(i,s)=>ud('steps',details.steps.map((st,j)=>j===i?s:st));
-  const removeStep=i=>ud('steps',details.steps.filter((_,j)=>j!==i));
-  const moveStep=(i,dir)=>{const n=[...details.steps];const t=i+dir;if(t<0||t>=n.length)return;[n[i],n[t]]=[n[t],n[i]];ud('steps',n)};
-  const addStep=()=>ud('steps',[...details.steps,{label:'New step',bullets:['Supporting bullet']}]);
-  const updateTool=(i,t)=>ud('helpfulTools',details.helpfulTools.map((tl,j)=>j===i?t:tl));
-  const removeTool=i=>ud('helpfulTools',details.helpfulTools.filter((_,j)=>j!==i));
-  const addTool=()=>ud('helpfulTools',[...details.helpfulTools,{name:'Tool name',desc:'Description'}]);
-  const gdUpdateProgressRow=(i,v)=>ugd('progressRows',goalDetails.progressRows.map((r,j)=>j===i?v:r));
-  const gdRemoveProgressRow=i=>ugd('progressRows',goalDetails.progressRows.filter((_,j)=>j!==i));
-  const gdAddProgressRow=()=>ugd('progressRows',[...goalDetails.progressRows,{name:'Name/area',timeframe:'Timeframe',label:'Label'}]);
-
-  const handleSave=()=>onSave({...experience,actions,updatedAt:Date.now()});
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <header className="bg-white border-b border-walmart-gray-100 px-6 sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-3">
-              <button onClick={onBack} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-walmart-gray-50 border border-walmart-gray-200">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#515357" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
               <div>
-                <h1 className="text-lg font-bold text-walmart-gray-800">{experience.name}</h1>
-                <p className="text-[11px] text-walmart-gray-400">Configure across card, detail & goal screens</p>
+                <label class="text-xs font-semibold text-gray-600 block mb-2">CTA Button Style</label>
+                <div class="flex gap-2">
+                  <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 transition">
+                    <input type="radio" name="ctaStyle" value="spark" checked class="accent-blue-700" onchange="updatePreview()"/>
+                    <span class="text-xs font-semibold text-gray-700">⭐ Spark Yellow</span>
+                  </label>
+                  <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 transition">
+                    <input type="radio" name="ctaStyle" value="white" class="accent-blue-700" onchange="updatePreview()"/>
+                    <span class="text-xs font-semibold text-gray-700">◻ White</span>
+                  </label>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={handleSave} className="px-5 py-2 rounded-lg text-sm font-bold bg-walmart-blue text-white hover:bg-walmart-blue-dark flex items-center gap-2">
-                <I.CheckCircle s={14}/> Save
-              </button>
-            </div>
-          </div>
-          <div className="flex gap-0 -mb-px">
-            <button onClick={()=>setActiveTab('card')} className={`px-5 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${activeTab==='card'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}><span className="flex items-center gap-2"><I.Layers s={14}/>Action Card</span></button>
-            <button onClick={()=>setActiveTab('details')} className={`px-5 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${activeTab==='details'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}><span className="flex items-center gap-2"><I.Clipboard/>Action Details</span></button>
-            <button onClick={()=>setActiveTab('goals')} className={`px-5 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${activeTab==='goals'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}><span className="flex items-center gap-2"><I.BarChart s={14}/>Goal Card</span></button>
-            <button onClick={()=>setActiveTab('goalDetails')} className={`px-5 py-2.5 text-[13px] font-semibold border-b-2 transition-all ${activeTab==='goalDetails'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}><span className="flex items-center gap-2"><I.CheckCircle s={14}/>Goal Details</span></button>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-[1400px] mx-auto flex gap-6 p-6 items-start">
-        <div className="flex-1 min-w-0 config-scroll space-y-5 pb-12 pr-2">
-          {actions.length>1 && (
-          <div className="bg-white rounded-xl border border-walmart-gray-100 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Actions <span className="text-walmart-gray-300 normal-case font-normal">({actions.length})</span></h3>
+        <!-- Your Schedule -->
+        <div class="comp-row border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm mb-2">
+          <div class="flex items-center gap-3 px-4 py-3 select-none">
+            <span class="text-gray-300 cursor-grab text-xs leading-none font-black tracking-tighter">⠿⠿</span>
+            <span class="text-base">📅</span>
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleAcc('sched')">
+              <div class="text-sm font-semibold text-gray-800">Your Schedule</div>
+              <div class="text-xs text-gray-400">Shift times · department · breaks</div>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {actions.map((action,idx)=>{
-                const cardName=action.fields.find(f=>f.id==='actionName');
-                return <button key={idx} onClick={()=>setActiveCardIdx(idx)} className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${idx===activeCardIdx?'bg-walmart-blue text-white':'bg-walmart-gray-50 text-walmart-gray-500 hover:bg-walmart-gray-100 border border-walmart-gray-200'}`}>
-                  {cardName&&cardName.value?cardName.value:`Action ${idx+1}`}
-                </button>;
-              })}
+            <button onclick="toggleSection('sched')" id="btn-sched" aria-label="Toggle schedule" class="w-10 h-5 rounded-full relative transition-colors focus:outline-none bg-blue-600 shrink-0">
+              <span id="knob-sched" class="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></span>
+            </button>
+            <svg class="w-4 h-4 text-gray-400 caret cursor-pointer shrink-0" id="caret-sched" onclick="toggleAcc('sched')" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="acc-body" id="acc-sched">
+            <div class="px-4 pb-4 pt-2 space-y-3 border-t border-gray-100">
+              <div><label class="text-xs font-semibold text-gray-600 block mb-1">Time Format</label>
+                <select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"><option>12-hour (9:00 AM)</option><option>24-hour (09:00)</option></select></div>
+              <div class="space-y-2 pt-1">
+                <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Show break times</span><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/></label>
+                <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Show department</span><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/></label>
+                <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Show upcoming shifts</span><input type="checkbox" class="w-4 h-4 accent-blue-700"/></label>
+                <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Show total weekly hours</span><input type="checkbox" class="w-4 h-4 accent-blue-700"/></label>
+              </div>
             </div>
           </div>
-          )}
-          {activeTab==='card' ? (<>
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Action Cards <span className="text-walmart-gray-300 normal-case font-normal">({actions.length})</span></h3>
-                <button onClick={addActionCard} className="text-[11px] font-semibold text-walmart-blue hover:text-walmart-blue-dark flex items-center gap-1"><I.Plus/> Add more actions</button>
-              </div>
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                {actions.map((action,idx)=>{
-                  const cardName=action.fields.find(f=>f.id==='actionName');
-                  return <div key={idx} className="flex items-center gap-1">
-                    <button onClick={()=>setActiveCardIdx(idx)} className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all ${idx===activeCardIdx?'bg-walmart-blue text-white':'bg-walmart-gray-50 text-walmart-gray-500 hover:bg-walmart-gray-100 border border-walmart-gray-200'}`}>
-                      {cardName&&cardName.value?cardName.value:`Action ${idx+1}`}
-                    </button>
-                    {actions.length>1&&<button onClick={()=>removeActionCard(idx)} className="text-walmart-gray-300 hover:text-walmart-error p-0.5"><I.X/></button>}
-                  </div>;
-                })}
-              </div>
-              <div className="flex items-center justify-between mb-2"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Card Fields</h3><span className="text-[11px] text-walmart-gray-300">{fields.filter(f=>f.enabled).length} of {fields.length} active</span></div>
-              <div className="space-y-2">{fields.map((f,i)=><FieldRow key={`${f.id}-${i}-${activeCardIdx}`} field={f} index={i} total={fields.length} onUpdate={u=>updateField(i,u)} onMove={moveField}/>)}</div>
-            </div>
-          </>) : activeTab==='details' ? (<>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Action Name</h3><input type="text" value={details.actionName} onChange={e=>ud('actionName',e.target.value)} className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Location or Time Attribute <span className="text-walmart-gray-300 normal-case font-normal">(optional)</span></h3><input type="text" value={details.location} onChange={e=>ud('location',e.target.value)} placeholder="e.g. D8 Pets, Aisle F8, 7:30am" className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-            <div>
-              <div className="flex items-center justify-between mb-2"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Steps to Succeed</h3><span className="text-[11px] text-walmart-gray-300">{details.steps.length} steps</span></div>
-              <div className="space-y-2">{details.steps.map((s,i)=><StepEditor key={i} step={s} index={i} total={details.steps.length} onChange={v=>updateStep(i,v)} onRemove={()=>removeStep(i)} onMove={moveStep}/>)}</div>
-              <button onClick={addStep} className="mt-3 w-full py-2.5 rounded-xl border-2 border-dashed border-walmart-gray-200 text-sm font-semibold text-walmart-gray-400 hover:border-walmart-blue hover:text-walmart-blue transition-all flex items-center justify-center gap-2"><I.Plus/> Add step</button>
-            </div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Teams Responsible</h3><select value={details.teamResponsible} onChange={e=>ud('teamResponsible',e.target.value)} className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue bg-white"><option value="">Select a team</option>{['Asset Protection','Digital','Deli/Bakery','Food/Consumables','Health & Beauty','Meat/Produce','Salesfloor','Frontend','Fuel','Auto Care Center','Entertainment','Fashion','Hardlines','Home','Seasonal','Management','Pharmacy','Stocking Day 1','Stocking Day 2','Stocking ON','Support','Vision Center'].map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3">
-              <h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Assigned To</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide block mb-1">Name</label><input type="text" value={details.assignedName} onChange={e=>ud('assignedName',e.target.value)} placeholder="e.g. Alex Carter" className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-                <div><label className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide block mb-1">Role / Position</label><input type="text" value={details.assignedRole} onChange={e=>ud('assignedRole',e.target.value)} placeholder="e.g. Team Lead" className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Helpful Tools</h3><span className="text-[11px] text-walmart-gray-300">{details.helpfulTools.length} tools</span></div>
-              <div className="space-y-2">{details.helpfulTools.map((t,i)=><ToolEditor key={i} tool={t} index={i} onChange={v=>updateTool(i,v)} onRemove={()=>removeTool(i)}/>)}</div>
-              <button onClick={addTool} className="mt-3 w-full py-2.5 rounded-xl border-2 border-dashed border-walmart-gray-200 text-sm font-semibold text-walmart-gray-400 hover:border-walmart-blue hover:text-walmart-blue transition-all flex items-center justify-center gap-2"><I.Plus/> Add tool</button>
-            </div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider mb-2">You'll Know You're Done When...</h3><textarea value={details.doneWhen} onChange={e=>ud('doneWhen',e.target.value)} rows={2} className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue resize-none"/></div>
-          </>) : activeTab==='goals' ? (<>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3">
-              <h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Goal Card</h3>
-              <div><label className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide block mb-1">Goal Name</label><input type="text" value={goals.goalName} onChange={e=>ug('goalName',e.target.value)} placeholder="e.g. Topstock, VizPick" className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-              <div><label className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide block mb-1">Short Description <span className="text-walmart-gray-300 normal-case font-normal">(optional)</span></label><textarea value={goals.shortDescription} onChange={e=>ug('shortDescription',e.target.value)} rows={2} placeholder="Brief description of the goal..." className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue resize-none"/></div>
-            </div>
-          </>) : (<>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Goal Title</h3><input type="text" value={goalDetails.goalTitle} onChange={e=>ugd('goalTitle',e.target.value)} placeholder="e.g. Topstock, VizPick" className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-2 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/></div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3">
-              <div className="flex items-center justify-between"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Attributes</h3><Toggle checked={goalDetails.showAttributes} onChange={v=>ugd('showAttributes',v)}/></div>
-              {goalDetails.showAttributes && (<div className="space-y-2.5">
-                {(goalDetails.gdAttributes||[]).map((attr,i)=>(
-                  <div key={i} className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <input type="text" value={attr.label} onChange={e=>{const a=[...goalDetails.gdAttributes];a[i]={...a[i],label:e.target.value};ugd('gdAttributes',a);}} placeholder="Label (e.g. Time, Location)" className="text-[11px] font-semibold text-walmart-gray-500 uppercase tracking-wide bg-transparent border-b border-dashed border-walmart-gray-200 focus:border-walmart-blue focus:outline-none pb-0.5 w-40"/>
-                      <button onClick={()=>{const a=goalDetails.gdAttributes.filter((_,j)=>j!==i);ugd('gdAttributes',a);}} className="text-walmart-gray-300 hover:text-walmart-error p-0.5 flex-shrink-0"><I.X/></button>
-                    </div>
-                    <input type="text" value={attr.value} onChange={e=>{const a=[...goalDetails.gdAttributes];a[i]={...a[i],value:e.target.value};ugd('gdAttributes',a);}} placeholder="Enter value..." className="w-full text-sm border border-walmart-gray-200 rounded-lg px-3 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-                  </div>
-                ))}
-                <button onClick={()=>ugd('gdAttributes',[...(goalDetails.gdAttributes||[]),{label:'',value:''}])} className="w-full py-1.5 rounded-lg border border-dashed border-walmart-gray-200 text-[11px] font-semibold text-walmart-gray-400 hover:border-walmart-blue hover:text-walmart-blue transition-all flex items-center justify-center gap-1"><I.Plus/> Add attribute</button>
-              </div>)}
-            </div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4 space-y-3">
-              <div className="flex items-center justify-between"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Progress Breakdown <span className="text-walmart-gray-300 normal-case font-normal">(optional)</span></h3><Toggle checked={goalDetails.showProgress} onChange={v=>ugd('showProgress',v)}/></div>
-              {goalDetails.showProgress && (<div className="space-y-1.5">
-                {goalDetails.progressRows.map((r,i)=>(<div key={i} className="flex items-center gap-2"><input type="text" value={r.name} onChange={e=>gdUpdateProgressRow(i,{...r,name:e.target.value})} placeholder="Name / Area" className="flex-1 text-[13px] border border-walmart-gray-200 rounded-lg px-2.5 py-1 text-walmart-gray-700 focus:outline-none focus:ring-1 focus:ring-walmart-blue/20"/><input type="text" value={r.timeframe} onChange={e=>gdUpdateProgressRow(i,{...r,timeframe:e.target.value})} placeholder="Timeframe" className="w-24 text-[13px] border border-walmart-gray-200 rounded-lg px-2.5 py-1 text-walmart-gray-600 focus:outline-none focus:ring-1 focus:ring-walmart-blue/20"/><input type="text" value={r.label} onChange={e=>gdUpdateProgressRow(i,{...r,label:e.target.value})} placeholder="Label" className="w-20 text-[13px] border border-walmart-gray-200 rounded-lg px-2.5 py-1 text-walmart-gray-600 focus:outline-none focus:ring-1 focus:ring-walmart-blue/20"/><button onClick={()=>gdRemoveProgressRow(i)} className="text-walmart-gray-300 hover:text-walmart-error p-0.5"><I.X/></button></div>))}
-                <button onClick={gdAddProgressRow} className="w-full py-1.5 rounded-lg border border-dashed border-walmart-gray-200 text-[11px] font-semibold text-walmart-gray-400 hover:border-walmart-blue hover:text-walmart-blue transition-all flex items-center justify-center gap-1"><I.Plus/> Add row</button>
-              </div>)}
-            </div>
-            <div className="bg-white rounded-xl border border-walmart-gray-100 p-4"><div className="flex items-center justify-between"><h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Goal Actions Section</h3><Toggle checked={goalDetails.showGoalActions} onChange={v=>ugd('showGoalActions',v)}/></div></div>
-          </>)}
         </div>
 
-        <div className="flex-shrink-0 sticky top-24">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Live Preview</h3>
-            <button onClick={resetCurrentAction} className="text-[11px] text-walmart-gray-400 hover:text-walmart-blue flex items-center gap-1"><I.Refresh/> Reset</button>
+        <!-- Things to Know -->
+        <div class="comp-row border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm mb-2">
+          <div class="flex items-center gap-3 px-4 py-3 select-none">
+            <span class="text-gray-300 cursor-grab text-xs leading-none font-black tracking-tighter">⠿⠿</span>
+            <span class="text-base">🔔</span>
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleAcc('ttk')">
+              <div class="text-sm font-semibold text-gray-800">Things to Know</div>
+              <div class="text-xs text-gray-400">Alerts · HR updates · training</div>
+            </div>
+            <button onclick="toggleSection('ttk')" id="btn-ttk" aria-label="Toggle notifications" class="w-10 h-5 rounded-full relative transition-colors focus:outline-none bg-blue-600 shrink-0">
+              <span id="knob-ttk" class="absolute top-0.5 right-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></span>
+            </button>
+            <svg class="w-4 h-4 text-gray-400 caret cursor-pointer shrink-0" id="caret-ttk" onclick="toggleAcc('ttk')" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </div>
-          {activeTab==='card' ? <PhoneScreen fields={fields} actionCards={actions.map(a=>a.fields)} activeCardIdx={activeCardIdx}/> : activeTab==='details' ? <DetailsPhoneScreen d={details}/> : activeTab==='goals' ? <GoalPhoneScreen g={goals}/> : <GoalDetailsPhoneScreen gd={goalDetails}/>}
-          <p className="text-[10px] text-walmart-gray-300 text-center mt-3">{activeTab==='card'?'The highlighted card reflects your configuration':activeTab==='details'?'Action Details screen preview':activeTab==='goals'?'Goal tracking screen preview':'Goal Details screen preview'}</p>
+          <div class="acc-body" id="acc-ttk">
+            <div class="px-4 pb-4 pt-2 border-t border-gray-100">
+              <p class="text-xs font-semibold text-gray-500 mb-2 mt-1">Notification Sources</p>
+              <div class="space-y-1.5">
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 📋 HR Policy Updates</label>
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 🛡️ Safety Alerts</label>
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 🎓 Training Reminders</label>
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-blue-700"/> 📢 Store Announcements</label>
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-blue-700"/> 🏥 Benefits Alerts</label>
+              </div>
+              <div class="mt-3"><label class="text-xs font-semibold text-gray-600 block mb-1">Max items to show</label>
+                <select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"><option>3 items</option><option>5 items</option><option>All</option></select></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="comp-row border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm mb-2">
+          <div class="flex items-center gap-3 px-4 py-3 select-none">
+            <span class="text-gray-300 cursor-grab text-xs leading-none font-black tracking-tighter">⠿⠿</span>
+            <span class="text-base">⚡</span>
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleAcc('qa')">
+              <div class="text-sm font-semibold text-gray-800">Quick Actions</div>
+              <div class="text-xs text-gray-400">Shortcut tiles for associates</div>
+            </div>
+            <button onclick="toggleSection('qa')" id="btn-qa" aria-label="Toggle quick actions" class="w-10 h-5 rounded-full relative transition-colors focus:outline-none bg-gray-300 shrink-0">
+              <span id="knob-qa" class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></span>
+            </button>
+            <svg class="w-4 h-4 text-gray-400 caret cursor-pointer shrink-0" id="caret-qa" onclick="toggleAcc('qa')" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="acc-body" id="acc-qa">
+            <div class="px-4 pb-4 pt-2 border-t border-gray-100">
+              <p class="text-xs font-semibold text-gray-500 mb-2 mt-1">Choose up to 4 shortcuts</p>
+              <div class="grid grid-cols-2 gap-2 qa-chip">
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 💰 My Pay</label>
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 🏥 Benefits</label>
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 🌴 Time Off</label>
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/> 📚 Training</label>
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700"/> 🗺️ Store Map</label>
+                <label class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl p-2.5 cursor-pointer hover:border-blue-400 transition"><input type="checkbox" class="w-4 h-4 accent-blue-700"/> ❓ Help</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Banner -->
+        <div class="comp-row border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm mb-2">
+          <div class="flex items-center gap-3 px-4 py-3 select-none">
+            <span class="text-gray-300 cursor-grab text-xs leading-none font-black tracking-tighter">⠿⠿</span>
+            <span class="text-base">🏷️</span>
+            <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleAcc('banner')">
+              <div class="text-sm font-semibold text-gray-800">Announcement Banner</div>
+              <div class="text-xs text-gray-400">Custom message with deep link</div>
+            </div>
+            <button onclick="toggleSection('banner')" id="btn-banner" aria-label="Toggle banner" class="w-10 h-5 rounded-full relative transition-colors focus:outline-none bg-gray-300 shrink-0">
+              <span id="knob-banner" class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></span>
+            </button>
+            <svg class="w-4 h-4 text-gray-400 caret cursor-pointer shrink-0" id="caret-banner" onclick="toggleAcc('banner')" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div class="acc-body" id="acc-banner">
+            <div class="px-4 pb-4 pt-2 space-y-3 border-t border-gray-100">
+              <div><label class="text-xs font-semibold text-gray-600 block mb-1">Message</label>
+                <input id="bannerText" type="text" value="🎉 Open Enrollment ends Dec 15" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" oninput="updatePreview()"/></div>
+              <div><label class="text-xs font-semibold text-gray-600 block mb-1">Deep Link URL</label>
+                <input type="url" placeholder="sidekick://benefits/enroll" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"/></div>
+              <div><label class="text-xs font-semibold text-gray-600 block mb-2">Color Theme</label>
+                <div class="flex gap-2 items-center">
+                  <button title="Walmart Blue" onclick="setBannerColor('blue',this)" class="w-7 h-7 rounded-full ring-2 ring-offset-1 ring-blue-600" style="background:#0053e2"></button>
+                  <button title="Spark Yellow" onclick="setBannerColor('spark',this)" class="w-7 h-7 rounded-full ring-0 hover:ring-2 ring-offset-1 ring-yellow-400" style="background:#ffc220"></button>
+                  <button title="Success Green" onclick="setBannerColor('green',this)" class="w-7 h-7 rounded-full ring-0 hover:ring-2 ring-offset-1 ring-green-600" style="background:#2a8703"></button>
+                  <button title="Alert Red" onclick="setBannerColor('red',this)" class="w-7 h-7 rounded-full ring-0 hover:ring-2 ring-offset-1 ring-red-600" style="background:#ea1100"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="w-full mt-1 border-2 border-dashed border-gray-200 rounded-2xl py-3 text-sm text-gray-400 hover:border-blue-400 hover:text-blue-600 transition font-semibold flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>Add Custom Section
+        </button>
+      </div>
+
+      <!-- ── SETTINGS TAB ── -->
+      <div id="panel-settings" class="hidden">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Card Configuration</p>
+        <div class="border border-gray-200 rounded-2xl p-4 bg-white space-y-3 shadow-sm">
+          <div><label class="text-xs font-semibold text-gray-600 block mb-1">Card Name (internal label)</label>
+            <input type="text" value="Store Associate — For You" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"/></div>
+          <div><label class="text-xs font-semibold text-gray-600 block mb-1">Target Audience</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"><option>All Associates</option><option>Store Managers</option><option>DC Associates</option><option>Hourly Only</option><option>Custom Segment…</option></select></div>
+          <div><label class="text-xs font-semibold text-gray-600 block mb-1">Data Refresh Rate</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"><option>Real-time (WebSocket)</option><option>Every 5 mins</option><option>Every 15 mins</option><option>Every hour</option></select></div>
+          <div class="pt-2 space-y-2 border-t border-gray-100">
+            <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Dark Mode Support</span><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/></label>
+            <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Offline / Cached State</span><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/></label>
+            <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Error Fallback Card</span><input type="checkbox" class="w-4 h-4 accent-blue-700" checked/></label>
+            <label class="flex items-center justify-between cursor-pointer"><span class="text-xs font-medium text-gray-700">Analytics Tracking</span><input type="checkbox" class="w-4 h-4 accent-blue-700"/></label>
+          </div>
         </div>
       </div>
+
+      <!-- ── API TAB ── -->
+      <div id="panel-api" class="hidden">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Data Sources</p>
+        <div class="space-y-2">
+          <div class="border border-gray-200 rounded-2xl p-4 bg-white shadow-sm flex items-center justify-between">
+            <div><div class="text-sm font-semibold text-gray-800">Scheduling API</div><div class="text-xs text-gray-400">Shift & schedule data</div></div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full text-white" style="background:#2a8703">● Live</span>
+          </div>
+          <div class="border border-gray-200 rounded-2xl p-4 bg-white shadow-sm flex items-center justify-between">
+            <div><div class="text-sm font-semibold text-gray-800">Workday (HR)</div><div class="text-xs text-gray-400">Profile, benefits, time off</div></div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full text-white" style="background:#2a8703">● Live</span>
+          </div>
+          <div class="border border-gray-200 rounded-2xl p-4 bg-white shadow-sm flex items-center justify-between">
+            <div><div class="text-sm font-semibold text-gray-800">LMS (Training)</div><div class="text-xs text-gray-400">Courses & completions</div></div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">⏳ Pending</span>
+          </div>
+          <div class="border border-gray-200 rounded-2xl p-4 bg-white shadow-sm flex items-center justify-between">
+            <div><div class="text-sm font-semibold text-gray-800">Custom Webhook</div><div class="text-xs text-gray-400">Bring your own data source</div></div>
+            <button class="text-xs font-bold px-3 py-1 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /scroll -->
+
+    <!-- Bottom stat bar -->
+    <div class="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50 flex-shrink-0">
+      <span class="text-xs text-gray-400"><span id="active-count">3</span> sections enabled</span>
+      <span class="text-xs text-gray-400 font-medium">v1.0 · Draft</span>
     </div>
-  );
-}
+  </aside>
 
-/* ═══════ APP ═══════ */
-const SHEET_API='https://script.google.com/macros/s/AKfycbwPcyL1EMCRVfaFIUQU63KCw_HHkBWWSbms8UQ_DJt7IhEp4PBDYDOgrAtBd6fUIh7IvQ/exec';
+  <!-- ════ RIGHT PREVIEW ════ -->
+  <section class="flex-1 flex flex-col bg-slate-100 overflow-hidden">
+    <!-- Preview toolbar -->
+    <div class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="text-sm font-bold text-gray-800">Live Preview</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full font-bold text-white live-dot" style="background:#0053e2">● FOR YOU</span>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">📱 iOS</button>
+        <button class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">🤖 Android</button>
+        <button class="px-3 py-1.5 rounded-lg text-xs font-bold text-white hover:opacity-90 transition" style="background:#0053e2">👁 Full Screen</button>
+      </div>
+    </div>
 
-function App() {
-  const [view,setView]=useState('home');
-  const [mainTab,setMainTab]=useState('experience');
-  const [experiences,setExperiences]=useState(()=>{try{const s=localStorage.getItem('axb_experiences');return s?JSON.parse(s):[];}catch(e){return[];}});
-  const [rankings,setRankings]=useState(()=>{try{const s=localStorage.getItem('axb_rankings');return s?JSON.parse(s):{};}catch(e){return{};}});
-  const [assignments,setAssignments]=useState(()=>{try{const s=localStorage.getItem('axb_assignments');return s?JSON.parse(s):{};}catch(e){return{};}});
-  const [intelTab,setIntelTab]=useState('prioritization');
-  const [currentExp,setCurrentExp]=useState(null);
-  const [newName,setNewName]=useState('');
-  const [syncing,setSyncing]=useState(false);
-  const [lastSync,setLastSync]=useState(null);
-  const TEAMS=['Asset Protection','Digital','Deli/Bakery','Food/Consumables','Health & Beauty','Meat/Produce','Salesfloor','Frontend','Fuel','Auto Care Center','Entertainment','Fashion','Hardlines','Home','Seasonal','Management','Pharmacy','Stocking Day 1','Stocking Day 2','Stocking ON','Support','Vision Center'];
+    <!-- Phone frame -->
+    <div class="flex-1 flex flex-col items-center justify-center overflow-auto py-6 gap-4">
+      <div class="phone-wrap">
+        <div class="phone-screen" id="phone-screen">
 
-  // Load from Google Sheets on mount
-  useEffect(()=>{
-    fetch(SHEET_API)
-      .then(r=>r.json())
-      .then(data=>{
-        if(data&&data.experiences){setExperiences(data.experiences);try{localStorage.setItem('axb_experiences',JSON.stringify(data.experiences));}catch(e){}}
-        if(data&&data.rankings){setRankings(data.rankings);try{localStorage.setItem('axb_rankings',JSON.stringify(data.rankings));}catch(e){}}
-        if(data&&data.assignments){setAssignments(data.assignments);try{localStorage.setItem('axb_assignments',JSON.stringify(data.assignments));}catch(e){}}
-        setLastSync(new Date());
-      })
-      .catch(()=>{});
-  },[]);
+          <!-- Status bar -->
+          <div style="background:#0053e2" class="flex items-center justify-between px-5 pt-3 pb-1.5">
+            <span class="text-white text-xs font-bold">9:41</span>
+            <div class="flex gap-1 items-center">
+              <svg class="w-3.5 h-3 fill-white opacity-80" viewBox="0 0 20 12"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="5" y="2" width="3" height="10" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/><rect x="16" y="1" width="4" height="10" rx="1" opacity=".4"/></svg>
+            </div>
+          </div>
 
-  // Save to Google Sheets
-  const syncToSheet=(exps,ranks,assigns)=>{
-    setSyncing(true);
-    const payload=JSON.stringify({experiences:exps,rankings:ranks,assignments:assigns});
-    fetch(SHEET_API,{method:'POST',body:payload,headers:{'Content-Type':'text/plain'},redirect:'follow'})
-      .then(()=>{setSyncing(false);setLastSync(new Date());})
-      .catch(()=>{
-        // Fallback: use no-cors mode (can't read response but data still saves)
-        fetch(SHEET_API,{method:'POST',body:payload,mode:'no-cors'})
-          .then(()=>{setSyncing(false);setLastSync(new Date());})
-          .catch(()=>setSyncing(false));
-      });
-  };
-  const forceSync=()=>syncToSheet(experiences,rankings,assignments);
+          <!-- Hero Card -->
+          <div style="background:linear-gradient(150deg,#0053e2 0%,#0041b5 100%)" class="px-5 pt-4 pb-8 relative overflow-hidden">
+            <svg class="absolute right-2 bottom-0 opacity-95" width="88" height="96" viewBox="0 0 88 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="44" cy="88" rx="26" ry="6" fill="#003ab5" opacity=".5"/>
+              <rect x="26" y="38" width="36" height="40" rx="10" fill="#ffc220"/>
+              <rect x="30" y="28" width="28" height="24" rx="7" fill="#ffd966"/>
+              <circle cx="38" cy="38" r="4" fill="#0053e2"/>
+              <circle cx="50" cy="38" r="4" fill="#0053e2"/>
+              <circle cx="38" cy="38" r="1.5" fill="#fff"/>
+              <circle cx="50" cy="38" r="1.5" fill="#fff"/>
+              <rect x="39" y="46" width="10" height="2.5" rx="1.25" fill="#0053e2" opacity=".55"/>
+              <rect x="18" y="44" width="10" height="5" rx="2.5" fill="#ffc220"/>
+              <rect x="60" y="44" width="10" height="5" rx="2.5" fill="#ffc220"/>
+              <rect x="32" y="76" width="10" height="14" rx="5" fill="#ffc220"/>
+              <rect x="46" y="76" width="10" height="14" rx="5" fill="#ffc220"/>
+              <rect x="36" y="53" width="3" height="8" rx="1.5" fill="#0053e2" opacity=".25"/>
+              <rect x="49" y="53" width="3" height="8" rx="1.5" fill="#0053e2" opacity=".25"/>
+            </svg>
+            <div class="text-white opacity-70 text-xs font-medium mb-1">Mon, Jun 1 · Store #4291</div>
+            <div class="text-white font-extrabold text-xl leading-tight mb-3 pr-20" id="preview-greeting">Good Morning, Alex 👋</div>
+            <div class="flex items-center gap-2 mb-5">
+              <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+              <span class="text-white text-xs opacity-75 font-medium">Grocery · Checked Out</span>
+            </div>
+            <button id="preview-cta" class="px-5 py-2.5 rounded-xl text-sm font-extrabold shadow-lg transition" style="background:#ffc220;color:#0a2540">Check In</button>
+          </div>
 
-  const saveToStorage=(list)=>{setExperiences(list);try{localStorage.setItem('axb_experiences',JSON.stringify(list));}catch(e){} syncToSheet(list,rankings,assignments);};
-  const saveRankings=(r)=>{setRankings(r);try{localStorage.setItem('axb_rankings',JSON.stringify(r));}catch(e){} syncToSheet(experiences,r,assignments);};
-  const saveAssignments=(a)=>{setAssignments(a);try{localStorage.setItem('axb_assignments',JSON.stringify(a));}catch(e){} syncToSheet(experiences,rankings,a);};
-  const setAssignment=(key,val)=>{const a={...assignments};a[key]=val;saveAssignments(a);};
+          <!-- Schedule -->
+          <div id="preview-sched" class="bg-white mx-3 mt-3 rounded-2xl p-4 shadow-sm">
+            <div class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-3">Your Schedule</div>
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div><div class="text-sm font-bold text-gray-900">Today · Grocery</div><div class="text-xs text-gray-400 mt-0.5">Aisle 3–5 · Break 11:00 AM</div></div>
+                <div class="text-right"><div class="text-sm font-extrabold" style="color:#0053e2">7:00–3:30 PM</div></div>
+              </div>
+              <div class="border-t border-gray-100 pt-2.5"><div class="text-xs text-gray-400">Tomorrow · 9:00 AM – 5:30 PM · Deli</div></div>
+            </div>
+          </div>
 
-  const startNew=()=>{
-    if(!newName.trim())return;
-    const exp={id:Date.now(),name:newName.trim(),actions:null,createdAt:Date.now(),updatedAt:Date.now()};
-    setCurrentExp(exp);
-    setNewName('');
-    setView('builder');
-  };
+          <!-- Things to Know -->
+          <div id="preview-ttk" class="mx-3 mt-3">
+            <div class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-2 px-0.5">Things to Know</div>
+            <div class="space-y-2">
+              <div class="bg-white rounded-2xl p-3 shadow-sm flex items-start gap-3">
+                <span class="text-lg mt-0.5">📋</span>
+                <div><div class="text-xs font-bold text-gray-800">New HR Policy Update</div><div class="text-xs text-gray-400 mt-0.5">PTO accrual changes effective Jan 1</div></div>
+                <svg class="w-3.5 h-3.5 text-gray-300 ml-auto mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+              </div>
+              <div class="bg-white rounded-2xl p-3 shadow-sm flex items-start gap-3">
+                <span class="text-lg mt-0.5">🛡️</span>
+                <div><div class="text-xs font-bold text-gray-800">Safety Reminder</div><div class="text-xs text-gray-400 mt-0.5">Slip & fall prevention training due</div></div>
+                <svg class="w-3.5 h-3.5 text-gray-300 ml-auto mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+              </div>
+              <div class="bg-white rounded-2xl p-3 shadow-sm flex items-start gap-3">
+                <span class="text-lg mt-0.5">🎓</span>
+                <div><div class="text-xs font-bold text-gray-800">Training Due Soon</div><div class="text-xs text-gray-400 mt-0.5">Food safety cert expires in 5 days</div></div>
+                <svg class="w-3.5 h-3.5 text-gray-300 ml-auto mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+          </div>
 
-  const editExp=(exp)=>{setCurrentExp(JSON.parse(JSON.stringify(exp)));setView('builder');};
-  const deleteExp=(id)=>{saveToStorage(experiences.filter(e=>e.id!==id));};
+          <!-- Quick Actions -->
+          <div id="preview-qa" class="mx-3 mt-3 hidden">
+            <div class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-2 px-0.5">Quick Actions</div>
+            <div class="grid grid-cols-4 gap-2">
+              <div class="bg-white rounded-2xl p-2.5 shadow-sm flex flex-col items-center gap-1"><span class="text-xl">💰</span><span class="text-xs text-gray-600 font-semibold">Pay</span></div>
+              <div class="bg-white rounded-2xl p-2.5 shadow-sm flex flex-col items-center gap-1"><span class="text-xl">🏥</span><span class="text-xs text-gray-600 font-semibold">Benefits</span></div>
+              <div class="bg-white rounded-2xl p-2.5 shadow-sm flex flex-col items-center gap-1"><span class="text-xl">🌴</span><span class="text-xs text-gray-600 font-semibold">Time Off</span></div>
+              <div class="bg-white rounded-2xl p-2.5 shadow-sm flex flex-col items-center gap-1"><span class="text-xl">📚</span><span class="text-xs text-gray-600 font-semibold">Training</span></div>
+            </div>
+          </div>
 
-  const handleSave=(updated)=>{
-    const exists=experiences.find(e=>e.id===updated.id);
-    const list=exists?experiences.map(e=>e.id===updated.id?updated:e):[...experiences,updated];
-    saveToStorage(list);
-    setView('home');
-    setCurrentExp(null);
-  };
+          <!-- Custom Banner -->
+          <div id="preview-banner" class="mx-3 mt-3 mb-2 hidden">
+            <div id="banner-inner" class="rounded-2xl px-4 py-3 text-sm font-bold text-center shadow-sm text-white" style="background:#0053e2">🎉 Open Enrollment ends Dec 15</div>
+          </div>
 
-  const allActions=[];
-  experiences.forEach(exp=>{
-    if(exp.actions){
-      exp.actions.forEach((action,idx)=>{
-        const nameField=action.fields.find(f=>f.id==='actionName');
-        allActions.push({key:`${exp.id}-${idx}`,expId:exp.id,expName:exp.name,actionName:nameField&&nameField.value?nameField.value:`Action ${idx+1}`,action:action});
-      });
+          <!-- Bottom Nav -->
+          <div class="bg-white border-t border-gray-100 mt-4 px-4 py-2.5 flex justify-around sticky bottom-0">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-5 h-5 rounded-md" style="background:#0053e2"></div>
+              <span class="text-xs font-extrabold" style="color:#0053e2">For You</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+              <div class="w-5 h-5 rounded-md bg-gray-300"></div>
+              <span class="text-xs font-semibold text-gray-400">Me</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 opacity-40">
+              <div class="w-5 h-5 rounded-md bg-gray-300"></div>
+              <span class="text-xs font-semibold text-gray-400">Academy</span>
+            </div>
+          </div>
+        </div><!-- /phone-screen -->
+      </div><!-- /phone-wrap -->
+      <p class="text-xs text-gray-400">Preview updates live · Sample data shown</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast -->
+<div id="toast" class="toast fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold flex items-center gap-2 z-50 whitespace-nowrap">
+  <span id="toast-icon">✅</span><span id="toast-msg">Saved!</span>
+</div>
+
+<script>
+  const state = { sched: true, ttk: true, qa: false, banner: false };
+  const bannerPalette = { blue:'#0053e2', spark:'#ffc220', green:'#2a8703', red:'#ea1100' };
+  let currentBannerColor = '#0053e2';
+
+  function toggleAcc(id) {
+    document.getElementById('acc-'+id).classList.toggle('open');
+    document.getElementById('caret-'+id).classList.toggle('open');
+  }
+
+  function toggleSection(id) {
+    state[id] = !state[id];
+    const btn = document.getElementById('btn-'+id);
+    const knob = document.getElementById('knob-'+id);
+    btn.style.background = state[id] ? '#0053e2' : '#d1d5db';
+    knob.style.right = state[id] ? '2px' : 'auto';
+    knob.style.left = state[id] ? 'auto' : '2px';
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const raw = document.getElementById('greetingText').value;
+    document.getElementById('preview-greeting').textContent =
+      raw.replace('{firstName}','Alex').replace('{timeOfDay}','Morning').replace('{role}','Associate').replace('{storeId}','4291');
+    const ctaEl = document.getElementById('preview-cta');
+    ctaEl.textContent = document.getElementById('ctaLabel').value || 'Check In';
+    const style = document.querySelector('input[name=ctaStyle]:checked')?.value;
+    if (style === 'spark') { ctaEl.style.background='#ffc220'; ctaEl.style.color='#0a2540'; }
+    else { ctaEl.style.background='#ffffff'; ctaEl.style.color='#0053e2'; }
+    ['sched','ttk','qa','banner'].forEach(id => {
+      document.getElementById('preview-'+id).classList.toggle('hidden', !state[id]);
+    });
+    if (state.banner) {
+      const b = document.getElementById('banner-inner');
+      b.textContent = document.getElementById('bannerText').value || '';
+      b.style.background = currentBannerColor;
+      b.style.color = currentBannerColor === '#ffc220' ? '#0a2540' : '#ffffff';
     }
+    document.getElementById('active-count').textContent = 1 + Object.values(state).filter(Boolean).length;
+  }
+
+  function setBannerColor(key, btn) {
+    currentBannerColor = bannerPalette[key];
+    document.querySelectorAll('[onclick^="setBannerColor"]').forEach(b => { b.style.outline='none'; b.className = b.className.replace(/ring-2/g,'ring-0'); });
+    btn.style.outline = '3px solid #0053e2';
+    updatePreview();
+  }
+
+  function insertToken(token) {
+    const el = document.getElementById('greetingText');
+    const pos = el.selectionStart || el.value.length;
+    el.value = el.value.slice(0,pos) + token + el.value.slice(pos);
+    updatePreview();
+  }
+
+  function switchTab(tab) {
+    ['components','settings','api'].forEach(t => {
+      document.getElementById('panel-'+t).classList.toggle('hidden', t!==tab);
+      const btn = document.getElementById('tab-'+t);
+      btn.classList.toggle('active', t===tab);
+    });
+  }
+
+  function showToast(icon, msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-icon').textContent = icon;
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function saveDraft() { showToast('✅','Draft saved successfully!'); }
+  function publish() { showToast('🚀','Published to Sidekick — live in ~60s!'); }
+
+  // Init toggle states
+  ['sched','ttk'].forEach(id => {
+    document.getElementById('btn-'+id).style.background = '#0053e2';
+    document.getElementById('knob-'+id).style.right = '2px';
+    document.getElementById('knob-'+id).style.left = 'auto';
   });
 
-  const setRank=(actionKey,section,val)=>{
-    const r={...rankings};
-    if(!r[actionKey])r[actionKey]={forYou:'',todaysPlan:''};
-    r[actionKey]={...r[actionKey],[section]:val};
-    saveRankings(r);
-  };
-
-  const maxRank=Math.max(allActions.length,20);
-  const rankOptions=Array.from({length:maxRank},(_, i)=>i+1);
-
-  if(view==='builder'&&currentExp) return <ExperienceBuilder experience={currentExp} onSave={handleSave} onBack={()=>{setView('home');setCurrentExp(null);}}/>;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <header className="bg-white border-b border-walmart-gray-100 px-6">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-center justify-between py-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{background:'linear-gradient(180deg,#34B8FE,#1946E8)'}}><I.Zap s={20} color="white"/></div>
-              <div>
-                <h1 className="text-xl font-bold text-walmart-gray-800">Action Experience Builder</h1>
-                <p className="text-[12px] text-walmart-gray-400">Create and manage action experiences</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {syncing ? (
-                <span className="text-[11px] text-walmart-gray-400 flex items-center gap-1"><I.Refresh/> Syncing...</span>
-              ) : lastSync ? (
-                <span className="text-[11px] text-walmart-gray-300 flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{background:'#6DD400'}}/> Synced</span>
-              ) : null}
-              <button onClick={()=>{fetch(SHEET_API).then(r=>r.json()).then(data=>{if(data&&data.experiences){setExperiences(data.experiences);}if(data&&data.rankings){setRankings(data.rankings);}if(data&&data.assignments){setAssignments(data.assignments);}setLastSync(new Date());}).catch(()=>{});}} className="text-[11px] text-walmart-gray-400 hover:text-walmart-blue flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-walmart-gray-50"><I.Refresh/> Refresh</button>
-              <button onClick={forceSync} className="text-[11px] text-walmart-blue hover:text-walmart-blue-dark flex items-center gap-1 px-3 py-1 rounded-lg border border-walmart-blue/30 hover:bg-walmart-blue-light font-semibold"><I.CheckCircle s={12}/> Sync Now</button>
-            </div>
-          </div>
-          <div className="flex gap-0 -mb-px">
-            <button onClick={()=>{setMainTab('experience');}} className={`px-6 py-2.5 text-[13px] font-semibold border-b-2 transition-all flex items-center gap-2 ${mainTab==='experience'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}>
-              <I.Layers s={14}/> Add Experience
-            </button>
-            <button onClick={()=>{setMainTab('intelligence');}} className={`px-6 py-2.5 text-[13px] font-semibold border-b-2 transition-all flex items-center gap-2 ${mainTab==='intelligence'?'border-walmart-blue text-walmart-blue':'border-transparent text-walmart-gray-400 hover:text-walmart-gray-600'}`}>
-              <I.BarChart s={14}/> Intelligence
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-[1200px] mx-auto px-6 py-8">
-        {mainTab==='experience' ? (<>
-          {view==='home' ? (<>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-[15px] font-bold text-walmart-gray-700">Your Experiences <span className="font-normal text-walmart-gray-400">({experiences.length})</span></h2>
-              <button onClick={()=>setView('naming')} className="px-5 py-2.5 rounded-lg text-sm font-bold bg-walmart-blue text-white hover:bg-walmart-blue-dark flex items-center gap-2 shadow-sm"><I.Plus/> Add New Experience</button>
-            </div>
-
-            {experiences.length===0 ? (
-              <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:'#E6F1FC'}}><I.Layers s={28}/></div>
-                <h3 className="text-lg font-bold text-walmart-gray-700 mb-1">No experiences yet</h3>
-                <p className="text-sm text-walmart-gray-400 mb-6">Create your first action experience to get started.</p>
-                <button onClick={()=>setView('naming')} className="px-6 py-3 rounded-lg text-sm font-bold bg-walmart-blue text-white hover:bg-walmart-blue-dark inline-flex items-center gap-2"><I.Plus/> Add New Experience</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {experiences.map(exp=>(
-                  <div key={exp.id} className="bg-white rounded-xl border border-walmart-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer group" onClick={()=>editExp(exp)}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background:'linear-gradient(180deg,#34B8FE,#1946E8)'}}><I.Zap s={18} color="white"/></div>
-                      <button onClick={e=>{e.stopPropagation();if(confirm('Delete "'+exp.name+'"?'))deleteExp(exp.id);}} className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-walmart-error-light text-walmart-gray-400 hover:text-walmart-error"><I.X/></button>
-                    </div>
-                    <h3 className="text-[15px] font-bold text-walmart-gray-700 mb-1">{exp.name}</h3>
-                    <p className="text-[12px] text-walmart-gray-400">Last edited {new Date(exp.updatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{background:exp.actions?'#E8F5E9':'#F1F1F2',color:exp.actions?'#2A8703':'#74767C'}}>{exp.actions?`${exp.actions.length} action${exp.actions.length>1?'s':''}` :'No actions'}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>) : view==='naming' ? (
-            <div className="max-w-lg mx-auto pt-16">
-              <div className="bg-white rounded-2xl border border-walmart-gray-100 p-8 shadow-sm">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{background:'linear-gradient(180deg,#34B8FE,#1946E8)'}}><I.Zap s={22} color="white"/></div>
-                <h2 className="text-xl font-bold text-walmart-gray-800 mb-1">New Action Experience</h2>
-                <p className="text-sm text-walmart-gray-400 mb-6">Give your experience a name to get started.</p>
-                <label className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider block mb-2">Experience Name</label>
-                <input type="text" value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&startNew()} placeholder="e.g. Stock D80 Service Deli, Topstock, VizPick" autoFocus className="w-full text-base border-2 border-walmart-gray-200 rounded-xl px-4 py-3 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue"/>
-                <div className="flex items-center gap-3 mt-6">
-                  <button onClick={()=>{setView('home');setNewName('');}} className="flex-1 py-3 rounded-xl text-sm font-semibold text-walmart-gray-600 hover:bg-walmart-gray-50 border border-walmart-gray-200">Cancel</button>
-                  <button onClick={startNew} disabled={!newName.trim()} className={`flex-1 py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 ${newName.trim()?'bg-walmart-blue hover:bg-walmart-blue-dark':'bg-walmart-gray-200 cursor-not-allowed'}`}>Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </>) : (
-          /* ═══════ INTELLIGENCE TAB ═══════ */
-          <div>
-            <div className="flex items-center gap-4 mb-6">
-              <button onClick={()=>setIntelTab('prioritization')} className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${intelTab==='prioritization'?'bg-walmart-blue text-white':'bg-white text-walmart-gray-500 border border-walmart-gray-200 hover:bg-walmart-gray-50'}`}>Prioritization</button>
-              <button onClick={()=>setIntelTab('assignment')} className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${intelTab==='assignment'?'bg-walmart-blue text-white':'bg-white text-walmart-gray-500 border border-walmart-gray-200 hover:bg-walmart-gray-50'}`}>Assignment</button>
-            </div>
-
-            {intelTab==='prioritization' ? (<>
-            <div className="mb-4">
-              <p className="text-[13px] text-walmart-gray-400">Rank your experiences for the For You action list and Today's Plan goal list. Lower number = higher priority.</p>
-            </div>
-
-            {experiences.length===0 ? (
-              <div className="text-center py-20">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:'#E6F1FC'}}><I.BarChart s={28}/></div>
-                <h3 className="text-lg font-bold text-walmart-gray-700 mb-1">No experiences to rank</h3>
-                <p className="text-sm text-walmart-gray-400 mb-6">Add experiences in the "Add Experience" tab first, then come here to set priorities.</p>
-                <button onClick={()=>setMainTab('experience')} className="px-6 py-3 rounded-lg text-sm font-bold bg-walmart-blue text-white hover:bg-walmart-blue-dark inline-flex items-center gap-2"><I.Plus/> Go to Add Experience</button>
-              </div>
-            ) : (<>
-              <div className="bg-white rounded-xl border border-walmart-gray-100 overflow-hidden mb-8">
-                <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-walmart-gray-100" style={{background:'#F8F8F8'}}>
-                  <div className="col-span-3"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Experience</span></div>
-                  <div className="col-span-3"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Action</span></div>
-                  <div className="col-span-3 text-center"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">For You Rank</span></div>
-                  <div className="col-span-3 text-center"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Today's Plan Rank</span></div>
-                </div>
-                {allActions.length===0 ? (
-                  <div className="px-6 py-8 text-center"><p className="text-[13px] text-walmart-gray-400 italic">Add experiences with actions first to set priorities.</p></div>
-                ) : allActions.map((a,i)=>{
-                  const r=rankings[a.key]||{forYou:'',todaysPlan:''};
-                  return (
-                    <div key={a.key} className={`grid grid-cols-12 gap-4 px-6 py-4 items-center ${i<allActions.length-1?'border-b border-walmart-gray-100':''}`}>
-                      <div className="col-span-3">
-                        <p className="text-[14px] font-semibold text-walmart-gray-700">{a.expName}</p>
-                      </div>
-                      <div className="col-span-3">
-                        <p className="text-[13px] text-walmart-gray-600">{a.actionName}</p>
-                      </div>
-                      <div className="col-span-3 flex justify-center">
-                        <select value={r.forYou} onChange={e=>setRank(a.key,'forYou',e.target.value)} className="w-20 text-[13px] border border-walmart-gray-200 rounded-lg px-2 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue bg-white text-center">
-                          <option value="">--</option>
-                          {rankOptions.map(n=><option key={n} value={n}>{n}</option>)}
-                        </select>
-                      </div>
-                      <div className="col-span-3 flex justify-center">
-                        <select value={r.todaysPlan} onChange={e=>setRank(a.key,'todaysPlan',e.target.value)} className="w-20 text-[13px] border border-walmart-gray-200 rounded-lg px-2 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue bg-white text-center">
-                          <option value="">--</option>
-                          {rankOptions.map(n=><option key={n} value={n}>{n}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* ── Phone Previews: For You + Today's Plan ── */}
-              <h3 className="text-[13px] font-bold text-walmart-gray-700 mb-4">Preview — How actions & goals will be ranked</h3>
-              <div className="flex gap-8 justify-center flex-wrap">
-
-                {/* ═══ FOR YOU PHONE ═══ */}
-                {(()=>{
-                  const forYouRanked=allActions.filter(a=>(rankings[a.key]||{}).forYou).sort((a,b)=>Number((rankings[a.key]||{}).forYou)-Number((rankings[b.key]||{}).forYou));
-                  const rankedCards=forYouRanked.map(a=>a.action.fields);
-                  return (
-                    <div>
-                      <p className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider text-center mb-2">For You</p>
-                      <PhoneScreen fields={rankedCards[0]||[]} actionCards={rankedCards} activeCardIdx={-1}/>
-                    </div>
-                  );
-                })()}
-
-                {/* ═══ TODAY'S PLAN PHONE ═══ */}
-                {(()=>{
-                  const tpRanked=allActions.filter(a=>(rankings[a.key]||{}).todaysPlan).sort((a,b)=>Number((rankings[a.key]||{}).todaysPlan)-Number((rankings[b.key]||{}).todaysPlan));
-                  const tpGoals=tpRanked.filter(a=>a.action.goals&&a.action.goals.goalName).map(a=>({name:a.action.goals.goalName,expName:a.expName}));
-                  return (
-                    <div>
-                      <p className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider text-center mb-2">Today's Plan</p>
-                      <div className="phone-frame">
-                        <div className="phone-scroll" style={{background:'#F8F8F8'}}>
-                          {/* Blue header */}
-                          <div style={{background:'#0071DC'}}>
-                            <div className="flex items-center justify-between px-6 pt-3">
-                              <span className="text-[13px] font-semibold text-white">9:41</span>
-                              <div className="flex items-center gap-1.5">
-                                <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx=".5" opacity=".3"/><rect x="4.5" y="2" width="3" height="10" rx=".5" opacity=".5"/><rect x="9" y="1" width="3" height="11" rx=".5" opacity=".7"/><rect x="13.5" y="0" width="2.5" height="12" rx=".5"/></svg>
-                                <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5C5.2 1.5 3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity=".5"/><path d="M7.5 6.8C8.6 6.8 9.5 7.2 10.2 7.9L11.6 6.5C10.5 5.5 9.1 4.8 7.5 4.8C5.9 4.8 4.5 5.5 3.4 6.5L4.8 7.9C5.5 7.2 6.4 6.8 7.5 6.8Z"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
-                                <div className="w-6 h-3 border border-white/60 rounded-sm relative"><div className="absolute inset-0.5 bg-white rounded-[1px]" style={{width:'70%'}}/></div>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between px-4 mt-2 pb-4">
-                              <div className="flex items-center gap-3">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                                <span className="text-[18px] font-bold text-white">Today's Plan</span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold" style={{background:'#CCE3F8',color:'#041E42'}}>AC</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Stocking Day pill */}
-                          <div style={{background:'#0071DC'}} className="px-4 pb-4">
-                            <div className="px-4 py-2 rounded-full" style={{background:'#004F9A'}}>
-                              <span className="text-[13px] font-semibold text-white">Stocking Day</span>
-                            </div>
-                          </div>
-
-                          {/* Today's summary */}
-                          <div style={{background:'#fff'}} className="px-4 pt-4 pb-4">
-                            <h2 className="text-[16px] font-bold mb-3" style={{color:'#2E2F32'}}>Today's summary</h2>
-                            <div className="rounded-xl border p-3 mb-3" style={{borderColor:'#E3E4E5'}}>
-                              <p className="text-[11px] font-bold uppercase" style={{color:'#74767C'}}>Outcome metrics</p>
-                              <div className="flex items-center gap-3 mt-2">
-                                <div className="flex-1"><p className="text-[11px]" style={{color:'#74767C'}}>25m ago</p><p className="text-[20px] font-bold" style={{color:'#2E2F32'}}>52.3k</p><p className="text-[11px]" style={{color:'#74767C'}}>Your team sales</p><p className="text-[11px]" style={{color:'#2A8703'}}>&#8593; 4.5%</p></div>
-                                <div className="flex-1"><p className="text-[11px]" style={{color:'#74767C'}}>7h ago</p><p className="text-[20px] font-bold" style={{color:'#2E2F32'}}>97.3%</p><p className="text-[11px]" style={{color:'#74767C'}}>FTPR</p><p className="text-[11px]" style={{color:'#2A8703'}}>&#8593; 1.2%</p></div>
-                                <div className="flex-1"><p className="text-[11px]" style={{color:'#74767C'}}>22m ago</p><p className="text-[20px] font-bold" style={{color:'#2E2F32'}}>17</p><p className="text-[11px]" style={{color:'#74767C'}}>Nil picks</p><p className="text-[11px]" style={{color:'#9B1419'}}>&#8595; 28</p></div>
-                              </div>
-                              <button className="cta-pill w-full mt-3">View all outcomes</button>
-                            </div>
-                            <div className="rounded-xl border p-3" style={{borderColor:'#E3E4E5'}}>
-                              <div className="flex items-center gap-2"><I.Store/><span className="text-[12px]" style={{color:'#515357'}}>Store #100</span></div>
-                              <div className="flex items-center justify-between mt-1">
-                                <p className="text-[12px]" style={{color:'#515357'}}>Stocking Day sales are 17.3% above plan</p>
-                                <I.ChevronRight s={14} c="#74767C"/>
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{height:8,background:'#F8F8F8'}}/>
-
-                          {/* Today's freight */}
-                          <div style={{background:'#fff'}} className="px-4 pt-4 pb-4">
-                            <h2 className="text-[16px] font-bold mb-1" style={{color:'#2E2F32'}}>Today's freight</h2>
-                            <p className="text-[12px]" style={{color:'#515357'}}>See trucks arriving in your store.</p>
-                            <div className="mt-3 space-y-1.5">
-                              <div className="flex items-center gap-2"><I.Truck/><span className="text-[12px] font-medium" style={{color:'#2E2F32'}}><b>3 of 5</b> warehouse trucks arrived</span></div>
-                              <div className="flex items-center gap-2"><I.Truck/><span className="text-[12px] font-medium" style={{color:'#2E2F32'}}><b>7 or 17</b> DSD trucks arrived</span></div>
-                            </div>
-                            <button className="cta-pill w-full mt-3">View today's freight</button>
-                          </div>
-                          <div style={{height:8,background:'#F8F8F8'}}/>
-
-                          {/* Track progress */}
-                          <div style={{background:'#fff'}} className="px-4 pt-4 pb-4">
-                            <h2 className="text-[16px] font-bold mb-1" style={{color:'#2E2F32'}}>Track progress</h2>
-                            <p className="text-[12px]" style={{color:'#515357'}}>Review the progress of your team and adjust as needed based on your expertise.</p>
-                            <div className="flex items-center gap-2 mt-3">
-                              <button className="px-4 py-2 rounded-full text-[12px] font-semibold" style={{background:'#2E2F32',color:'#fff'}}>View by work</button>
-                              <button className="px-4 py-2 rounded-full text-[12px] font-semibold border" style={{borderColor:'#E3E4E5',color:'#2E2F32'}}>View by associate</button>
-                            </div>
-                          </div>
-                          <div style={{height:8,background:'#F8F8F8'}}/>
-
-                          {/* Shift goals section */}
-                          <div style={{background:'#fff'}} className="px-4 pt-4 pb-4">
-                            <h2 className="text-[16px] font-bold mb-1" style={{color:'#2E2F32'}}>Shift goals <span className="font-normal" style={{color:'#74767C'}}>({tpGoals.length})</span></h2>
-                            <div className="flex items-center gap-1.5 mb-3 px-3 py-2 rounded-full" style={{background:'#F8F8F8'}}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                              <span className="text-[11px]" style={{color:'#515357'}}>Actions assigned for maximum customer value.</span>
-                            </div>
-                            {tpGoals.length===0 ? (
-                              <div className="py-6 text-center"><p className="text-[13px] text-walmart-gray-400 italic">Set Today's Plan rankings above to preview</p></div>
-                            ) : tpGoals.map((g,i)=>(
-                              <div key={i} className="flex items-center justify-between py-3" style={{borderBottom:i<tpGoals.length-1?'1px solid #E3E4E5':'none'}}>
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{background:'#E6F1FC'}}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0071DC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                  </div>
-                                  <div>
-                                    <p className="text-[14px] font-semibold" style={{color:'#0071DC'}}>{g.name}</p>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      <div className="w-16 h-1.5 rounded-full" style={{background:'#E3E4E5'}}><div className="h-1.5 rounded-full" style={{background:'#0071DC',width:'40%'}}/></div>
-                                      <span className="text-[11px]" style={{color:'#74767C'}}>25% complete</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <I.ChevronRight s={16} c="#74767C"/>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Bottom nav */}
-                          <div className="sticky bottom-0 flex items-center justify-around px-4" style={{height:68,background:'#fff',boxShadow:'0 -5px 10px rgba(0,0,0,0.05)'}}>
-                            <div className="flex flex-col items-center gap-1">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                              <span className="text-[10px]" style={{color:'#74767C'}}>First</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="#0071DC" stroke="#0071DC" strokeWidth="0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/></svg>
-                              <span className="text-[10px] font-semibold" style={{color:'#0071DC'}}>Today's plan</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#74767C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                              <span className="text-[10px]" style={{color:'#74767C'}}>Your Team</span>
-                            </div>
-                          </div>
-                          <div style={{height:8,background:'#fff'}}/>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </>)}
-            </>) : (
-              /* ═══ ASSIGNMENT SUB-TAB ═══ */
-              <div>
-                <div className="mb-4">
-                  <p className="text-[13px] text-walmart-gray-400">Assign a responsible team to each action. Teams are from the Action Details teams list.</p>
-                </div>
-                {allActions.length===0 ? (
-                  <div className="text-center py-20">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:'#E6F1FC'}}><I.Layers s={28}/></div>
-                    <h3 className="text-lg font-bold text-walmart-gray-700 mb-1">No actions to assign</h3>
-                    <p className="text-sm text-walmart-gray-400 mb-6">Add experiences with actions first.</p>
-                    <button onClick={()=>setMainTab('experience')} className="px-6 py-3 rounded-lg text-sm font-bold bg-walmart-blue text-white hover:bg-walmart-blue-dark inline-flex items-center gap-2"><I.Plus/> Go to Add Experience</button>
-                  </div>
-                ) : (
-                  <div className="bg-white rounded-xl border border-walmart-gray-100 overflow-hidden">
-                    <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-walmart-gray-100" style={{background:'#F8F8F8'}}>
-                      <div className="col-span-4"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Experience</span></div>
-                      <div className="col-span-4"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Action</span></div>
-                      <div className="col-span-4"><span className="text-[11px] font-bold text-walmart-gray-400 uppercase tracking-wider">Team Responsible</span></div>
-                    </div>
-                    {allActions.map((a,i)=>(
-                      <div key={a.key} className={`grid grid-cols-12 gap-4 px-6 py-4 items-center ${i<allActions.length-1?'border-b border-walmart-gray-100':''}`}>
-                        <div className="col-span-4">
-                          <p className="text-[14px] font-semibold text-walmart-gray-700">{a.expName}</p>
-                        </div>
-                        <div className="col-span-4">
-                          <p className="text-[13px] text-walmart-gray-600">{a.actionName}</p>
-                        </div>
-                        <div className="col-span-4">
-                          <select value={assignments[a.key]||''} onChange={e=>setAssignment(a.key,e.target.value)} className="w-full text-[13px] border border-walmart-gray-200 rounded-lg px-2 py-1.5 text-walmart-gray-700 focus:outline-none focus:ring-2 focus:ring-walmart-blue/20 focus:border-walmart-blue bg-white">
-                            <option value="">Select team</option>
-                            {TEAMS.map(t=><option key={t} value={t}>{t}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  document.querySelectorAll('input[name=ctaStyle]').forEach(r => r.addEventListener('change', updatePreview));
+  updatePreview();
 </script>
 </body>
 </html>
